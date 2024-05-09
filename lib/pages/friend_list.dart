@@ -27,7 +27,7 @@ class _FriendListPageState extends State<FriendListPage> {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 26, 24, 46),
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(128, 0, 128, 1),
+        backgroundColor      : const Color.fromARGB(128, 0, 128, 1),
         title: Container(
           
           child: Row(

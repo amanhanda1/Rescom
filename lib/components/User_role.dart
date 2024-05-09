@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:resapp/components/research_topics.dart';
 import 'package:resapp/pages/Profile_page.dart';
 
 class UserList extends StatefulWidget {
@@ -31,12 +32,18 @@ class _UserListState extends State<UserList> {
           .update({'lastseen': FieldValue.serverTimestamp()});
     }
   }
+
   @override
   Widget build(BuildContext context) {
     void navigateToProfilePage(String userId) {
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => ProfilePage(userId: userId,)));
+          context,
+          MaterialPageRoute(
+              builder: (context) => ProfilePage(
+                    userId: userId,
+                  )));
     }
+
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 26, 24, 46),
       appBar: AppBar(
@@ -69,35 +76,52 @@ class _UserListState extends State<UserList> {
             itemBuilder: (BuildContext context, int index) {
               Map<String, dynamic> data =
                   snapshot.data!.docs[index].data() as Map<String, dynamic>;
-                  final lastSeen = data['lastseen'];
-                  final isOnline = _checkOnlineStatus(lastSeen);
-
-                      final cardColor = isOnline
-                          ? Color.fromARGB(255, 250, 253,251)
-                          : Color.fromARGB(72, 252, 252,252);
-                      final dotColor = isOnline ? Colors.green : Colors.red;
+              final lastSeen = data['lastseen'];
+              final isOnline = _checkOnlineStatus(lastSeen);
+              final cardColor = isOnline
+                  ? Color.fromARGB(255, 250, 253, 251)
+                  : Color.fromARGB(72, 252, 252, 252);
+              final dotColor = isOnline ? Colors.green : Colors.red;
+              final selectedTopics =
+                  List<String>.from(data['selectedTopics'] ?? []);
+              final topicTitles = selectedTopics
+                  .map((id) => researchTopics
+                      .firstWhere((topic) => topic.id == id,
+                          orElse: () => ResearchTopic(id: id, title: id))
+                      .title)
+                  .join(', ');
               return GestureDetector(
-                onTap: (){
+                onTap: () {
                   navigateToProfilePage(data['uid']);
                 },
                 child: Card(
-                  color:cardColor,
+                  color: cardColor,
                   child: ListTile(
                     leading: Container(
-                              width: 10,
-                              height: 10,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: dotColor,
-                              ),
-                            ),
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: dotColor,
+                      ),
+                    ),
                     title: Text(
                       data['username'],
                       style: TextStyle(color: Colors.white),
                     ),
-                    subtitle: Text(
-                      data['university'],
-                      style: TextStyle(color: Colors.white60),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          data['university'],
+                          style: TextStyle(color: Colors.white60),
+                        ),
+                        if (selectedTopics.isNotEmpty)
+                          Text(
+                            'Research Topics: $topicTitles',
+                            style: TextStyle(color: Colors.white60),
+                          ),
+                      ],
                     ),
                   ),
                 ),

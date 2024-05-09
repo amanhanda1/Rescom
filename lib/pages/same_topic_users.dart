@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:resapp/components/research_topics.dart';
 import 'package:resapp/pages/Profile_page.dart';
 
 class UsersPage extends StatefulWidget {
@@ -34,8 +35,8 @@ class _UsersPageState extends State<UsersPage> {
   @override
   Widget build(BuildContext context) {
     void navigateToProfilePage(String userId) {
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => ProfilePage(userId: userId)));
+      Navigator.pushReplacement(context,
+          MaterialPageRoute(builder: (context) => ProfilePage(userId: userId)));
     }
 
     return Scaffold(
@@ -66,10 +67,13 @@ class _UsersPageState extends State<UsersPage> {
               List<DocumentSnapshot> users = snapshot.data!.docs;
               List<DocumentSnapshot> filteredUsers = [];
               for (var user in users) {
-                Map<String, dynamic>? userData = user.data() as Map<String, dynamic>?;
+                Map<String, dynamic>? userData =
+                    user.data() as Map<String, dynamic>?;
                 if (userData != null) {
-                  List<String> userSelectedTopics = List<String>.from(userData['selectedTopics'] ?? []);
-                  if (userSelectedTopics.any((topic) => currentUserSelectedTopics.contains(topic))) {
+                  List<String> userSelectedTopics =
+                      List<String>.from(userData['selectedTopics'] ?? []);
+                  if (userSelectedTopics.any(
+                      (topic) => currentUserSelectedTopics.contains(topic))) {
                     filteredUsers.add(user);
                   }
                 }
@@ -84,7 +88,8 @@ class _UsersPageState extends State<UsersPage> {
               return ListView.builder(
                 itemCount: filteredUsers.length,
                 itemBuilder: (context, index) {
-                  var userData = filteredUsers[index].data() as Map<String, dynamic>?;
+                  var userData =
+                      filteredUsers[index].data() as Map<String, dynamic>?;
                   if (userData != null) {
                     final lastSeen = userData['lastseen'];
                     final isOnline = _checkOnlineStatus(lastSeen);
@@ -92,6 +97,14 @@ class _UsersPageState extends State<UsersPage> {
                         ? Color.fromARGB(255, 250, 253, 251)
                         : Color.fromARGB(72, 252, 252, 252);
                     final dotColor = isOnline ? Colors.green : Colors.red;
+                    final selectedTopics =
+                        List<String>.from(userData['selectedTopics'] ?? []);
+                    final topicTitles = selectedTopics
+                        .map((id) => researchTopics
+                            .firstWhere((topic) => topic.id == id,
+                                orElse: () => ResearchTopic(id: id, title: id))
+                            .title)
+                        .join(', ');
 
                     return GestureDetector(
                       onTap: () {
@@ -112,9 +125,19 @@ class _UsersPageState extends State<UsersPage> {
                             userData['username'],
                             style: TextStyle(color: Colors.white),
                           ),
-                          subtitle: Text(
-                            userData['university'],
-                            style: TextStyle(color: Colors.white60),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                userData['university'],
+                                style: TextStyle(color: Colors.white60),
+                              ),
+                              if (selectedTopics.isNotEmpty)
+                                Text(
+                                  'Research Topics: $topicTitles',
+                                  style: TextStyle(color: Colors.white60),
+                                ),
+                            ],
                           ),
                         ),
                       ),
