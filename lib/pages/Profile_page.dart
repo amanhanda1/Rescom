@@ -29,7 +29,14 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   bool showPosts = true;
-  void navigateToProfilePage() {}
+  void navigateToProfilePage(String userId) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ProfilePage(userId: userId),
+        ),
+      );
+    }
   void logout() {
       Navigator.push(
         context,
@@ -278,7 +285,8 @@ class _ProfilePageState extends State<ProfilePage> {
         },
       ),
       bottomNavigationBar: cNavigationBar(
-        onProfileIconPressed: navigateToProfilePage,
+        onProfileIconPressed: () =>
+            navigateToProfilePage(FirebaseAuth.instance.currentUser!.uid),
         onHomePressed: navigateToHomePage,
         onAdduserPressed: navigateToAddUser,
         onChatPressed:() =>
