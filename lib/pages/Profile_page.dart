@@ -142,7 +142,7 @@ class _ProfilePageState extends State<ProfilePage> {
           final name = userData['username'] ?? '';
           final bio = userData['bio'] ?? '';
           final universityName = userData['university'] ?? '';
-          final photoUrl = userData['profilePicUrl'] ?? '';
+          final photoUrl = userData['photoUrl'] ?? '';
           final linkedInUrl = userData['linkedInUrl'] ?? '';
           final researchGateUrl = userData['researchGateUrl'] ?? '';
 
