@@ -29,10 +29,14 @@ class _LoginPageState extends State<LoginPage> {
       
     });
 
-  } on FirebaseAuthException catch(e) {
-    Navigator.pop(context);
-    displayerror(e.code, context);
-  }
+  } on FirebaseAuthException catch(e){
+      Navigator.pop(context);
+    showDialog(
+      context: context,
+      builder: (context) =>CustomErrorDialog(message: e.message ?? 'An error occurred'),
+    );
+
+    }
 }
 
   

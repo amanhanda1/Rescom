@@ -63,7 +63,10 @@ class _RegisterPageState extends State<RegisterPage> {
   // Confirming the password
   if (passwordController.text != cpasswordController.text) {
     Navigator.pop(context);
-    displayerror("Password does not match", context); // Function from helper
+    showDialog(
+      context: context,
+      builder: (context) => CustomErrorDialog(message: "password doesn't match"),
+    );
   }
   // Creating the user
   else {
@@ -79,9 +82,13 @@ class _RegisterPageState extends State<RegisterPage> {
     });
 
     } on FirebaseAuthException catch (e) {
-      Navigator.pop(context);
-      displayerror(e.code, context);
-    }
+        Navigator.pop(context);
+    showDialog(
+      context: context,
+      builder: (context) => CustomErrorDialog(message: e.message ?? 'An error occurred'),
+    );
+
+      }
   }
 }
 
