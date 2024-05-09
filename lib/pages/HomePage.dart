@@ -106,15 +106,13 @@ class HomePage extends StatelessWidget {
                                 style: TextStyle(
                                     fontFamily: GoogleFonts.aBeeZee().fontFamily,
                                     fontSize: 12,
-                                    color:
-                                        const Color.fromARGB(255, 39, 38, 38))),
+                                    color: Color.fromARGB(255, 255, 240, 223))),
                             Text(
                                 '${userData?['university'] ?? 'Unknown University'}',
                                 style: TextStyle(
                                     fontFamily: GoogleFonts.cardo().fontFamily,
                                     fontSize: 12,
-                                    color:
-                                        const Color.fromARGB(255, 39, 38, 38))),
+                                      color: Color.fromARGB(255, 255, 240, 223))),
                             const SizedBox(height: 2),
                             Text(
                                 _formatDateTime(post['timestamp'] as Timestamp? ??
@@ -122,8 +120,7 @@ class HomePage extends StatelessWidget {
                                 style: TextStyle(
                                     fontFamily: GoogleFonts.lobster().fontFamily,
                                     fontSize: 9.8,
-                                    color:
-                                        const Color.fromARGB(255, 39, 38, 38))),
+                                    color: Color.fromARGB(255, 255, 240, 223)))
                           ],
                         ),
                         onTap: () {

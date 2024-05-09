@@ -40,6 +40,8 @@ class _PostsWidgetState extends State<PostsWidget> {
         return SingleChildScrollView(
           child: Column(
             children: [
+              const Center(child: Text("Posts",textAlign: TextAlign.center,
+                  style: TextStyle(color: Color.fromARGB(255, 255, 240, 223)),)),
               for (var index = 0; index < posts.length; index++)
                 _buildPostTile(posts[index], index)
             ],

@@ -10,6 +10,7 @@ import 'package:resapp/components/custom_nav_bar.dart';
 import 'package:resapp/components/edit_profile.dart';
 import 'package:resapp/components/friend_button.dart';
 import 'package:resapp/components/friend_count.dart';
+import 'package:resapp/components/research_topics.dart';
 import 'package:resapp/components/show_posts.dart';
 import 'package:resapp/messaging/allmessages.dart';
 import 'package:resapp/messaging/chatroom.dart';
@@ -30,21 +31,23 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   bool showPosts = true;
   void navigateToProfilePage(String userId) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ProfilePage(userId: userId),
-        ),
-      );
-    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ProfilePage(userId: userId),
+      ),
+    );
+  }
+
   void logout() {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const FirstPage(),
-        ),
-      );
-    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const FirstPage(),
+      ),
+    );
+  }
+
   void navigateToHomePage() {
     Navigator.pushReplacement(
       context,
@@ -58,14 +61,15 @@ class _ProfilePageState extends State<ProfilePage> {
       MaterialPageRoute(builder: (context) => const AddUser()),
     );
   }
+
   void navigateToChatPage(String userId) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => allMessages(userId: userId),
-        ),
-      );
-    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => allMessages(userId: userId),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -83,43 +87,48 @@ class _ProfilePageState extends State<ProfilePage> {
                 child: Text(
                   "P R O F I L E",
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Color.fromARGB(255, 255, 240, 223)),
+                  style: TextStyle(color: Color.fromARGB(255, 255, 240, 223),fontWeight: FontWeight.w800,fontSize: 18),
+                  
                 ),
               ),
             ),
           ],
         ),
-        actions: isOwnProfile?[
-          // Add PopupMenuButton
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              if (value == 'logout') {
-                logout();
-              }
-              else if(value=='edit topics'){
-                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ResearchTopicSelection()));
-              }
-              
-            },
-            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-              // Option 1: Logout
-              const PopupMenuItem<String>(
-                value: 'logout',
-                child: ListTile(
-                  leading: Icon(Icons.logout),
-                  title: Text('Logout'),
+        actions: isOwnProfile
+            ? [
+                // Add PopupMenuButton
+                PopupMenuButton<String>(
+                  onSelected: (value) {
+                    if (value == 'logout') {
+                      logout();
+                    } else if (value == 'edit topics') {
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ResearchTopicSelection()));
+                    }
+                  },
+                  itemBuilder: (BuildContext context) =>
+                      <PopupMenuEntry<String>>[
+                    // Option 1: Logout
+                    const PopupMenuItem<String>(
+                      value: 'logout',
+                      child: ListTile(
+                        leading: Icon(Icons.logout),
+                        title: Text('Logout'),
+                      ),
+                    ),
+                    const PopupMenuItem<String>(
+                      value: 'edit topics',
+                      child: ListTile(
+                        leading: Icon(Icons.edit_document),
+                        title: Text('edit topics'),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              const PopupMenuItem<String>(
-                value: 'edit topics',
-                child: ListTile(
-                  leading: Icon(Icons.edit_document),
-                  title: Text('edit topics'),
-                ),
-              ),
-            ],
-          ),
-        ]:null,
+              ]
+            : null,
       ),
       body: FutureBuilder<DocumentSnapshot>(
         future: FirebaseFirestore.instance
@@ -152,6 +161,14 @@ class _ProfilePageState extends State<ProfilePage> {
           final photoUrl = userData['photoUrl'] ?? '';
           final linkedInUrl = userData['linkedInUrl'] ?? '';
           final researchGateUrl = userData['researchGateUrl'] ?? '';
+          final selectedTopics =
+              List<String>.from(userData['selectedTopics'] ?? []);
+          final topicTitles = selectedTopics
+              .map((id) => researchTopics
+                  .firstWhere((topic) => topic.id == id,
+                      orElse: () => ResearchTopic(id: id, title: id))
+                  .title)
+              .join(', ');
 
           return SingleChildScrollView(
             child: Column(
@@ -205,7 +222,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             icon: const Icon(Icons.chat_bubble,
                                 color: Colors.white),
                           ),
-                        ], 
+                        ],
                       ],
                     ),
                   ],
@@ -215,7 +232,6 @@ class _ProfilePageState extends State<ProfilePage> {
                         color: Colors.white,
                         fontSize: 11,
                         fontFamily: GoogleFonts.josefinSans().fontFamily)),
-                const SizedBox(height: 8),
                 const SizedBox(height: 8),
                 if (isOwnProfile)
                   ElevatedButton(
@@ -229,7 +245,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     },
                     style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.all<Color>(
-                        Colors.orange.shade800,
+                        const Color.fromARGB(128, 0, 128, 1),
                       ),
                       shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                         const RoundedRectangleBorder(
@@ -252,8 +268,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 Text(
                   "$bio",
                   style: const TextStyle(
-                    color: Color.fromARGB(255, 0, 0, 0),
-                    backgroundColor: Colors.orange,
+                    color: Color.fromARGB(255, 255, 240, 223),
+                    backgroundColor: Color.fromARGB(92, 0, 128, 0),
                     fontStyle: FontStyle.italic,
                     fontSize: 14,
                   ),
@@ -263,10 +279,10 @@ class _ProfilePageState extends State<ProfilePage> {
                   children: [
                     if (linkedInUrl.isNotEmpty)
                       _buildLinkedInButton(linkedInUrl),
-                      const Spacer(),
-                      FriendCountWidget(userId: widget.userId),
-                      const Spacer(),
-                      if(researchGateUrl.isNotEmpty)
+                    const Spacer(),
+                    FriendCountWidget(userId: widget.userId),
+                    const Spacer(),
+                    if (researchGateUrl.isNotEmpty)
                       _buildResGAteButton(researchGateUrl),
                   ],
                 ),
@@ -277,8 +293,33 @@ class _ProfilePageState extends State<ProfilePage> {
                   thickness: 1,
                   height: 20,
                 ),
-                const SizedBox(height: 8),
-                    PostsWidget(userId: widget.userId)
+                Row(
+                  children: [
+                    const Text(
+                      "Research Topics:",
+                      style: TextStyle(
+                        color: Color.fromARGB(255, 255, 240, 223),
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        ' $topicTitles',
+                        style: const TextStyle(color: Colors.white60),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ),
+
+                const Divider(
+                  color: Colors.black,
+                  thickness: 1,
+                  height: 15,
+                ),
+                const SizedBox(height: 4.5),
+                PostsWidget(userId: widget.userId)
               ],
             ),
           );
@@ -289,7 +330,7 @@ class _ProfilePageState extends State<ProfilePage> {
             navigateToProfilePage(FirebaseAuth.instance.currentUser!.uid),
         onHomePressed: navigateToHomePage,
         onAdduserPressed: navigateToAddUser,
-        onChatPressed:() =>
+        onChatPressed: () =>
             navigateToChatPage(FirebaseAuth.instance.currentUser!.uid),
       ),
     );
@@ -298,7 +339,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _buildLinkedInButton(String linkedInUrl) {
     return TextButton(
       onPressed: () {
-          _launchURL(linkedInUrl);
+        _launchURL(linkedInUrl);
       },
       child: const Text('LinkedIn'),
     );
@@ -307,7 +348,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _buildResGAteButton(String researchGateUrl) {
     return TextButton(
       onPressed: () {
-          _launchURL(researchGateUrl);
+        _launchURL(researchGateUrl);
       },
       child: const Text('Res Gate'),
     );
@@ -315,10 +356,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
   // Function to launch URL using url_launcher
   void _launchURL(String url) async {
-  if (await canLaunchUrl(Uri.parse(url))) {
-    await launchUrl(Uri.parse(url));
-  } else {
-    throw 'Could not launch $url';
+    if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url));
+    } else {
+      throw 'Could not launch $url';
+    }
   }
-}
 }

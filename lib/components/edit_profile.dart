@@ -115,8 +115,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             const SizedBox(height: 24),
             TextField(
               controller: bioController,
+              maxLength: 250,
               decoration: const InputDecoration(
-                hintText: 'Enter Bio',
+                hintText: 'Enter Bio(Max:250 words)',
                 hintStyle: TextStyle(color: Color.fromARGB(250, 24, 0, 39)),
                 filled: true,
                 fillColor: Colors.white,
