@@ -315,10 +315,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
   // Function to launch URL using url_launcher
   void _launchURL(String url) async {
-    if (await canLaunchUrl(url as Uri)) {
-      await launchUrl(url as Uri);
-    } else {
-      throw 'Could not launch $url';
-    }
+  if (await canLaunchUrl(Uri.parse(url))) {
+    await launchUrl(Uri.parse(url));
+  } else {
+    throw 'Could not launch $url';
   }
+}
 }
