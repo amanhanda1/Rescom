@@ -29,7 +29,7 @@ class _AddUserState extends State<AddUser> {
   }
 
   void navigateToHomePage() {
-    Navigator.pushReplacement(
+    Navigator.push(
         context, MaterialPageRoute(builder: (context) => HomePage()));
   }
 

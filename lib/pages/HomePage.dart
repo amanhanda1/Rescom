@@ -15,11 +15,11 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     void navigateToProfilePage(String userId) {
-      Navigator.pushReplacement(
+      Navigator.push(
           context, MaterialPageRoute(builder: (context) => ProfilePage(userId: userId,)));
     }
     void navigateToAddUser(){
-      Navigator.pushReplacement(
+      Navigator.push(
           context, MaterialPageRoute(builder: (context) => AddUser()));
     }
     void navigateToChatPage(String userId) {

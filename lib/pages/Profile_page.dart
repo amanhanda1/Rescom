@@ -49,14 +49,14 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   void navigateToHomePage() {
-    Navigator.pushReplacement(
+    Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const HomePage()),
     );
   }
 
   void navigateToAddUser() {
-    Navigator.pushReplacement(
+    Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const AddUser()),
     );

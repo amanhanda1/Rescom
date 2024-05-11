@@ -30,7 +30,7 @@ class _allMessagesState extends State<allMessages> {
     }
 
     void navigateToAddUser() {
-      Navigator.pushReplacement(
+      Navigator.push(
           context, MaterialPageRoute(builder: (context) => const AddUser()));
     }
 
