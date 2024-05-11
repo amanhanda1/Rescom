@@ -94,7 +94,7 @@ class _UsersPageState extends State<UsersPage> {
                     final lastSeen = userData['lastseen'];
                     final isOnline = _checkOnlineStatus(lastSeen);
                     final cardColor = isOnline
-                        ? Color.fromARGB(255, 250, 253, 251)
+                        ? Color.fromARGB(255, 196, 203, 198)
                         : Color.fromARGB(72, 252, 252, 252);
                     final dotColor = isOnline ? Colors.green : Colors.red;
                     final selectedTopics =

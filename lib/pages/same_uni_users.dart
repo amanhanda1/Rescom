@@ -4,16 +4,34 @@ import 'package:flutter/material.dart';
 import 'package:resapp/components/research_topics.dart';
 import 'package:resapp/pages/Profile_page.dart';
 
-class UserList extends StatefulWidget {
-  final String role;
-
-  const UserList({Key? key, required this.role}) : super(key: key);
+class sameUniUsers extends StatefulWidget {
+  const sameUniUsers({Key? key}) : super(key: key);
 
   @override
-  _UserListState createState() => _UserListState();
+  State<sameUniUsers> createState() => _sameUniUsersState();
 }
 
-class _UserListState extends State<UserList> {
+class _sameUniUsersState extends State<sameUniUsers> {
+  String currentUniversity = ''; // Initialize with an empty string
+  late QuerySnapshot usersSnapshot;
+
+  @override
+  void initState() {
+    super.initState();
+    getUserUniversity();
+  }
+
+  Future<void> getUserUniversity() async {
+    DocumentSnapshot? userSnapshot = await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .get();
+
+    setState(() {
+      currentUniversity = userSnapshot['university'] ?? '';
+    });
+    }
+
   bool _checkOnlineStatus(dynamic lastSeen) {
     if (lastSeen is Timestamp) {
       final currentTime = Timestamp.now();
@@ -49,14 +67,14 @@ class _UserListState extends State<UserList> {
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(128, 0, 128, 1),
         title: Text(
-          widget.role == 'Student' ? 'Student List' : 'Teacher List',
+          "Same University users",
           style: TextStyle(color: Colors.white),
         ),
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('Users')
-            .where('role', isEqualTo: widget.role)
+            .where('university', isEqualTo: currentUniversity)
             .snapshots(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.hasError) {
@@ -68,7 +86,11 @@ class _UserListState extends State<UserList> {
           }
 
           if (snapshot.data!.docs.isEmpty) {
-            return Center(child: Text('No ${widget.role}s found'));
+            return Center(
+                child: Text(
+              'empty',
+              style: TextStyle(color: Colors.white),
+            ));
           }
 
           return ListView.builder(
@@ -113,12 +135,12 @@ class _UserListState extends State<UserList> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          data['university'],
+                          data['role'] ?? "old",
                           style: TextStyle(color: Colors.white60),
                         ),
                         if (selectedTopics.isNotEmpty)
                           Text(
-                            'Research Topics: $topicTitles',
+                            'Research Topics: $topicTitles' ,
                             style: TextStyle(color: Colors.white60),
                           ),
                       ],
