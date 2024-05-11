@@ -108,6 +108,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               builder: (context) => ResearchTopicSelection()));
                     }
                   },
+                  iconColor: const Color.fromARGB(255, 255, 240, 223),
                   itemBuilder: (BuildContext context) =>
                       <PopupMenuEntry<String>>[
                     // Option 1: Logout

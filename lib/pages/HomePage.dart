@@ -85,7 +85,7 @@ class HomePage extends StatelessWidget {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      color: Colors.white.withOpacity(0.42),
+                      color: Colors.white.withOpacity(0.26),
                       child: ListTile(
                         contentPadding: const EdgeInsets.all(16),
                         shape: RoundedRectangleBorder(
@@ -96,7 +96,8 @@ class HomePage extends StatelessWidget {
                           style: TextStyle(
                               fontFamily: GoogleFonts.nunito().fontFamily,
                               fontSize: 21,
-                              fontWeight: FontWeight.w700),
+                              fontWeight: FontWeight.w700,
+                              color: const Color.fromARGB(255, 255, 240, 223)),
                         ),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -106,21 +107,14 @@ class HomePage extends StatelessWidget {
                                 style: TextStyle(
                                     fontFamily: GoogleFonts.aBeeZee().fontFamily,
                                     fontSize: 12,
-                                    color: Color.fromARGB(255, 255, 240, 223))),
-                            Text(
-                                '${userData?['university'] ?? 'Unknown University'}',
-                                style: TextStyle(
-                                    fontFamily: GoogleFonts.cardo().fontFamily,
-                                    fontSize: 12,
-                                      color: Color.fromARGB(255, 255, 240, 223))),
-                            const SizedBox(height: 2),
+                                    color: Color.fromARGB(255, 164, 159, 152))),
                             Text(
                                 _formatDateTime(post['timestamp'] as Timestamp? ??
                                     Timestamp.now()),
                                 style: TextStyle(
                                     fontFamily: GoogleFonts.lobster().fontFamily,
                                     fontSize: 9.8,
-                                    color: Color.fromARGB(255, 255, 240, 223)))
+                                    color: Color.fromARGB(255, 164, 159, 152)))
                           ],
                         ),
                         onTap: () {

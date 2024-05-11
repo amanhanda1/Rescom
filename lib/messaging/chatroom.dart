@@ -20,7 +20,7 @@ class ChatRoomPage extends StatefulWidget {
 class _ChatRoomPageState extends State<ChatRoomPage> {
   final TextEditingController _messageController = TextEditingController();
   String _receiverUsername = '';
-  bool _isHovering = false; 
+  bool _isHovering = false;
 
   @override
   void initState() {
@@ -58,9 +58,9 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     }
 
     return Scaffold(
-      backgroundColor: const Color.fromARGB(206, 41, 152, 128),
+      backgroundColor: const Color.fromARGB(255, 26, 24, 46),
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(206, 41, 152, 128),
+        backgroundColor: const Color.fromARGB(128, 0, 128, 1),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),
           onPressed: () {
@@ -68,36 +68,42 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
           },
         ),
         actions: [
-  Expanded(
-    child: Align(
-      alignment: Alignment.center,
-      child: AnimatedContainer(
-        duration: Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-        decoration: BoxDecoration(
-          color: _isHovering ? Colors.orange : Color.fromARGB(0, 250, 248, 248),
-          borderRadius: BorderRadius.circular(8.0), // adjust the radius as needed
-        ),
-        child: ElevatedButton(
-          onPressed: navigateToEventPage,
-          onHover: (isHovering) {
-            setState(() {
-              _isHovering = isHovering;
-            });
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor:_isHovering ? Colors.orange : Color.fromARGB(0, 250, 248, 248), // set the button background to transparent
-            elevation: 0, // Remove elevation
+          Expanded(
+            child: Align(
+              alignment: Alignment.center,
+              child: AnimatedContainer(
+                duration: Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                decoration: BoxDecoration(
+                  color: _isHovering
+                      ? Colors.orange
+                      : Color.fromARGB(0, 250, 248, 248),
+                  borderRadius:
+                      BorderRadius.circular(8.0), // adjust the radius as needed
+                ),
+                child: ElevatedButton(
+                  onPressed: navigateToEventPage,
+                  onHover: (isHovering) {
+                    setState(() {
+                      _isHovering = isHovering;
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _isHovering
+                        ? Colors.orange
+                        : Color.fromARGB(0, 250, 248,
+                            248), // set the button background to transparent
+                    elevation: 0, // Remove elevation
+                  ),
+                  child: Text(
+                    _receiverUsername.toUpperCase() + ' >',
+                    style: const TextStyle(fontSize: 22, color: Colors.black),
+                  ),
+                ),
+              ),
+            ),
           ),
-          child: Text(
-            _receiverUsername.toUpperCase()+' >',
-            style: const TextStyle(fontSize: 22, color: Colors.black),
-          ),
-        ),
-      ),
-    ),
-  ),
-],
+        ],
       ),
       body: Column(
         children: [
@@ -142,9 +148,14 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                             color: isSenderMessage ? Colors.blue : Colors.grey,
                             borderRadius: BorderRadius.circular(16),
                           ),
-                          child: Text(
-                            message,
-                            style: const TextStyle(color: Colors.white),
+                          child: GestureDetector(
+                            onLongPress: () {
+                              
+                            },
+                            child: Text(
+                              message,
+                              style: const TextStyle(color: Colors.white),
+                            ),
                           ),
                         ),
                       ),
