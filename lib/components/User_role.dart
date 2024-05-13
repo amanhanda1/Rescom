@@ -47,10 +47,13 @@ class _UserListState extends State<UserList> {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 26, 24, 46),
       appBar: AppBar(
+        leading: Icon(Icons.person_add_alt_1),
         backgroundColor: const Color.fromARGB(128, 0, 128, 1),
-        title: Text(
-          widget.role == 'Student' ? 'Student List' : 'Teacher List',
-          style: TextStyle(color: Colors.white),
+        title: Center(
+          child: Text(
+            widget.role == 'Student' ? 'Student List' : 'Teacher List',
+            style: TextStyle(color: Colors.white),
+          ),
         ),
       ),
       body: StreamBuilder<QuerySnapshot>(
