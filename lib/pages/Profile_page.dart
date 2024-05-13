@@ -157,6 +157,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
           final userData = snapshot.data!.data() as Map<String, dynamic>;
           final name = userData['username'] ?? '';
+          final fname = userData['firstName'] ?? '';
+          final lname = userData['lastName'] ?? '';
           final bio = userData['bio'] ?? '';
           final universityName = userData['university'] ?? '';
           final photoUrl = userData['photoUrl'] ?? '';
@@ -175,10 +177,12 @@ class _ProfilePageState extends State<ProfilePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const Center(
+                Center(
                   child: Text(
-                    "P R O F I L E",
+                  "$name",
                     style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
                   ),
@@ -199,7 +203,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     Row(
                       children: [
                         Text(
-                          "Name: $name ",
+                          "Name: $fname $lname",
                           style: TextStyle(
                             color: Colors.white,
                             fontFamily: GoogleFonts.aBeeZee().fontFamily,

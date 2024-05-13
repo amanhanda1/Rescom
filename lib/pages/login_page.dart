@@ -5,6 +5,7 @@ import 'package:resapp/components/error.dart';
 import 'package:resapp/components/forget_password.dart';
 import 'package:resapp/components/mytextfield.dart';
 import 'package:resapp/pages/HomePage.dart';
+import 'package:resapp/pages/sign_up.dart';
 class LoginPage extends StatefulWidget {
  
   LoginPage({super.key });
@@ -18,25 +19,53 @@ class _LoginPageState extends State<LoginPage> {
 
   final TextEditingController passwordController = TextEditingController();
   void login() async {
-  showDialog(context: context, builder: (context)=>const Center(child: CircularProgressIndicator(),));
-  try {
-    await FirebaseAuth.instance.signInWithEmailAndPassword(email: emailController.text, password: passwordController.text);
-    
-    // Fetching the role from Firestore
-    FirebaseFirestore.instance.collection("Users").doc(FirebaseAuth.instance.currentUser?.uid).get().then((doc) {
-      
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage()));
-      
-    });
+  showDialog(
+    context: context,
+    builder: (context) => const Center(child: CircularProgressIndicator()),
+  );
 
-  } on FirebaseAuthException catch(e){
-      Navigator.pop(context);
-    showDialog(
-      context: context,
-      builder: (context) =>CustomErrorDialog(message: e.message ?? 'An error occurred'),
+  try {
+    late String email;
+    if (emailController.text.contains('@')) {
+      // Use the input as email
+      email = emailController.text;
+    } else {
+      // Use the input as username and fetch the corresponding email from Firestore
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection("Users")
+          .where("username", isEqualTo: emailController.text)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        email = querySnapshot.docs.first.get("email");
+      } else {
+        throw FirebaseAuthException(code: 'user-not-found');
+      }
+    }
+
+    await FirebaseAuth.instance.signInWithEmailAndPassword(
+      email: email,
+      password: passwordController.text,
     );
 
-    }
+    // Fetching the role from Firestore
+    FirebaseFirestore.instance
+        .collection("Users")
+        .doc(FirebaseAuth.instance.currentUser?.uid)
+        .get()
+        .then((doc) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomePage()),
+      );
+    });
+  } on FirebaseAuthException catch (e) {
+    Navigator.pop(context);
+    showDialog(
+      context: context,
+      builder: (context) => CustomErrorDialog(message: e.message ?? 'An error occurred'),
+    );
+  }
 }
 
   
@@ -57,7 +86,7 @@ class _LoginPageState extends State<LoginPage> {
             color:Color.fromARGB(255, 255, 240, 223))),
             const SizedBox(height: 10),
             MyTextField(
-              hintText: "abc@gmail.com",
+              hintText: "email or username",
               obscureText: false,
               controller: emailController,
             ),
@@ -80,6 +109,31 @@ class _LoginPageState extends State<LoginPage> {
                   minimumSize: MaterialStateProperty.all(const Size(999, 44)),
                 ),
                 child:const Text("Login",style: TextStyle(color: Color.fromARGB(255, 65, 64, 64)),)),
+                const SizedBox(height: 4.5),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("create a new account ",style: TextStyle(color:const Color.fromARGB(255, 255, 240, 223)),),
+                  GestureDetector(
+                    onTap: () {
+                      // Navigate to the login page
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => RegisterPage()),
+                      );
+                    },
+                    child: const Text(
+                      "sign up",
+                      style: TextStyle(
+                        fontStyle: FontStyle.italic,
+                        color: Colors.blue,
+                        decoration: TextDecoration.underline,
+                        decorationColor: Colors.blue,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
                 const SizedBox(height:10),
             PasswordResetWidget(),
           ]),

@@ -5,6 +5,8 @@ import 'package:resapp/components/error.dart';
 import 'package:resapp/components/mytextfield.dart';
 import 'package:resapp/components/showuniversities.dart';
 import 'package:resapp/pages/interest_page.dart';
+import 'package:resapp/pages/login_page.dart';
+
 class RegisterPage extends StatefulWidget {
   RegisterPage({Key? key});
 
@@ -13,6 +15,8 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
+  final TextEditingController firstNameController = TextEditingController();
+  final TextEditingController lastNameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -53,74 +57,85 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   void resisterUser() async {
-  // Loading circle
-  showDialog(
-    context: context,
-    builder: (context) => const Center(
-      child: CircularProgressIndicator(),
-    ),
-  );
-  // Confirming the password
-  if (passwordController.text != cpasswordController.text) {
-    Navigator.pop(context);
+    // Loading circle
     showDialog(
       context: context,
-      builder: (context) => CustomErrorDialog(message: "password doesn't match"),
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
     );
-  }
-  // Creating the user
-  else {
-    try {
-      UserCredential? userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: emailController.text, password: passwordController.text);
-      await createUserDocument(userCredential, selectedDate, selectedUniversity,selectedRole);
-      
-      // Fetching the role from Firestore
-      FirebaseFirestore.instance.collection("Users").doc(userCredential.user?.uid).get().then((doc) {
-        
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ResearchTopicSelection()));
-    });
+    // Confirming the password
+    if (passwordController.text != cpasswordController.text) {
+      Navigator.pop(context);
+      showDialog(
+        context: context,
+        builder: (context) =>
+            CustomErrorDialog(message: "password doesn't match"),
+      );
+    }
+    // Creating the user
+    else {
+      try {
+        UserCredential? userCredential = await FirebaseAuth.instance
+            .createUserWithEmailAndPassword(
+                email: emailController.text, password: passwordController.text);
+        await createUserDocument(
+            userCredential, selectedDate, selectedUniversity, selectedRole);
 
-    } on FirebaseAuthException catch (e) {
+        // Fetching the role from Firestore
+        FirebaseFirestore.instance
+            .collection("Users")
+            .doc(userCredential.user?.uid)
+            .get()
+            .then((doc) {
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => ResearchTopicSelection()));
+        });
+      } on FirebaseAuthException catch (e) {
         Navigator.pop(context);
-    showDialog(
-      context: context,
-      builder: (context) => CustomErrorDialog(message: e.message ?? 'An error occurred'),
-    );
-
+        showDialog(
+          context: context,
+          builder: (context) =>
+              CustomErrorDialog(message: e.message ?? 'An error occurred'),
+        );
       }
+    }
   }
-}
 
   Future<void> createUserDocument(
-  UserCredential? userCredential,
-  DateTime? dob,
-  String? university,
-  String? role,
-) async {
-  if (userCredential != null && userCredential.user != null) {
-    await FirebaseFirestore.instance
-        .collection("Users")
-        .doc(userCredential.user!.uid) // Store user UID as document ID
-        .set({
-      'email': emailController.text,
-      'uid': userCredential.user!.uid, // Store user UID
-      'username': usernameController.text,
-      'password': passwordController.text,
-      'dob': dob,
-      'linkedInUrl':'',
-      'researchGateUrl':'',
-      'role': role,
-      'university': university,
-      'lastseen': FieldValue.serverTimestamp(),
-    });
+    UserCredential? userCredential,
+    DateTime? dob,
+    String? university,
+    String? role,
+  ) async {
+    if (userCredential != null && userCredential.user != null) {
+      await FirebaseFirestore.instance
+          .collection("Users")
+          .doc(userCredential.user!.uid) // Store user UID as document ID
+          .set({
+        'email': emailController.text,
+        'uid': userCredential.user!.uid, // Store user UID
+        'username': usernameController.text,
+        'password': passwordController.text,
+        'dob': dob,
+        'linkedInUrl': '',
+        'researchGateUrl': '',
+        'Gender': '',
+        'role': role,
+        'university': university,
+        'lastseen': FieldValue.serverTimestamp(),
+        'firstName': firstNameController.text,
+        'lastName': lastNameController.text,
+      });
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:const Color.fromARGB(255, 26, 24, 46),
+      backgroundColor: const Color.fromARGB(255, 26, 24, 46),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(22.0),
@@ -128,10 +143,32 @@ class _RegisterPageState extends State<RegisterPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(Icons.person,
-                  size: 80,
-                  color: Color.fromARGB(255, 255, 240, 223)),
+                  size: 80, color: Color.fromARGB(255, 255, 240, 223)),
               const SizedBox(height: 24),
-              const Text("Z I N S A", style: TextStyle(fontSize: 20,color:Color.fromARGB(255, 255, 240, 223))),
+              const Text("R E S C O M",
+                  style: TextStyle(
+                      fontSize: 20, color: Color.fromARGB(255, 255, 240, 223))),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(
+                    child: MyTextField(
+                      hintText: "First Name",
+                      obscureText: false,
+                      controller: firstNameController,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: MyTextField(
+                      hintText: "Last Name",
+                      obscureText: false,
+                      controller: lastNameController,
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 10),
               MyTextField(
                 hintText: "UserName",
@@ -164,25 +201,32 @@ class _RegisterPageState extends State<RegisterPage> {
                 children: [
                   DropdownButton<String>(
                     value: selectedRole,
-                    hint: const Text('Select Role',style: TextStyle(color: Color.fromARGB(255, 255, 240, 223))), // Placeholder text
+                    hint: const Text('Select Role',
+                        style: TextStyle(
+                            color: Color.fromARGB(
+                                255, 255, 240, 223))), // Placeholder text
                     onChanged: (String? newValue) {
                       setState(() {
                         selectedRole = newValue;
                       });
                     },
-                    style: const TextStyle(color: Color.fromARGB(255, 26, 24, 46)),
+                    style:
+                        const TextStyle(color: Color.fromARGB(255, 26, 24, 46)),
                     dropdownColor: Color.fromARGB(255, 26, 24, 46),
                     items: <String>['Student', 'Teacher'] // Dropdown items
                         .map<DropdownMenuItem<String>>((String value) {
                       return DropdownMenuItem<String>(
                         value: value,
-                        child: Text(value,style: const TextStyle(color: Color.fromARGB(255, 255, 240, 223)),),
+                        child: Text(
+                          value,
+                          style: const TextStyle(
+                              color: Color.fromARGB(255, 255, 240, 223)),
+                        ),
                       );
                     }).toList(),
                   ),
                 ],
               ),
-              
               const SizedBox(
                 height: 12,
               ),
@@ -199,7 +243,10 @@ class _RegisterPageState extends State<RegisterPage> {
                       children: [
                         Icon(Icons.calendar_month_sharp),
                         Text("   "),
-                        Text("DoB",style:TextStyle(color:Color.fromARGB(249, 5, 1, 9),)),
+                        Text("DoB",
+                            style: TextStyle(
+                              color: Color.fromARGB(249, 5, 1, 9),
+                            )),
                       ],
                     ),
                   ),
@@ -221,7 +268,10 @@ class _RegisterPageState extends State<RegisterPage> {
                       );
                       setUniversity(selectedUniversity!);
                     },
-                    child: const Text("SELECT YOUR UNIVERSITY",style:TextStyle(color:Color.fromARGB(249, 5, 1, 9),)),
+                    child: const Text("SELECT YOUR UNIVERSITY",
+                        style: TextStyle(
+                          color: Color.fromARGB(249, 5, 1, 9),
+                        )),
                   ),
                 ],
               ),
@@ -231,8 +281,8 @@ class _RegisterPageState extends State<RegisterPage> {
               ElevatedButton(
                 onPressed: resisterUser,
                 style: ButtonStyle(
-                  backgroundColor:
-                      MaterialStateProperty.all<Color>(Color.fromARGB(255, 255, 240, 223)),
+                  backgroundColor: MaterialStateProperty.all<Color>(
+                      Color.fromARGB(255, 255, 240, 223)),
                   minimumSize: MaterialStateProperty.all(const Size(999, 44)),
                 ),
                 child: const Text(
@@ -243,7 +293,31 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 4.5),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("Already have an account? ",style: TextStyle(color:const Color.fromARGB(255, 255, 240, 223))),
+                  GestureDetector(
+                    onTap: () {
+                      // Navigate to the login page
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => LoginPage()),
+                      );
+                    },
+                    child: const Text(
+                      "Login",
+                      style: TextStyle(
+                        fontStyle: FontStyle.italic,
+                        color: Colors.blue,
+                        decoration: TextDecoration.underline,
+                        decorationColor: Colors.blue,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
         ),

@@ -44,7 +44,7 @@ class _FirstPageState extends State<FirstPage> with SingleTickerProviderStateMix
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Text(
-                "R E S",
+                "R E S C O M",
                 style: TextStyle(
                   color: Color.fromARGB(255, 233, 233, 236),
                   fontSize: 25,

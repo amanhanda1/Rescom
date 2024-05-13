@@ -9,6 +9,7 @@ class EditProfileScreen extends StatefulWidget {
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
   TextEditingController nameController = TextEditingController();
+  TextEditingController GenderController = TextEditingController();
   TextEditingController bioController = TextEditingController();
   TextEditingController linkedInController = TextEditingController();
   TextEditingController researchGateController = TextEditingController();
@@ -54,6 +55,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       String bio = bioController.text.trim();
       String linkedInUrl = linkedInController.text.trim();
       String researchGateUrl = researchGateController.text.trim();
+      String Gender=GenderController.text.trim();
 
       // Update only if username or bio is not empty
       if (username.isNotEmpty || bio.isNotEmpty) {
@@ -66,6 +68,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           'linkedInUrl': linkedInUrl.isNotEmpty ? linkedInUrl : _linkedInUrl,
           'researchGateUrl':
               researchGateUrl.isNotEmpty ? researchGateUrl : _researchGateUrl,
+              'Gender':Gender,
         });
 
         setState(() {
@@ -148,6 +151,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               controller: researchGateController,
               decoration: const InputDecoration(
                 hintText: 'Enter ResearchGate URL',
+                hintStyle: TextStyle(color: Color.fromARGB(250, 24, 0, 39)),
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: EdgeInsets.all(10),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide.none,
+                  borderRadius: BorderRadius.all(Radius.circular(8)),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            TextField(
+              controller: GenderController,
+              decoration: const InputDecoration(
+                hintText: 'Gender',
                 hintStyle: TextStyle(color: Color.fromARGB(250, 24, 0, 39)),
                 filled: true,
                 fillColor: Colors.white,

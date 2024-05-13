@@ -115,8 +115,10 @@ class UniversityListScreenState extends State<UniversityListScreen> {
                 },
                 decoration: const InputDecoration(
                   labelText: 'Search University',
-                  prefixIcon: Icon(Icons.search),
+                  prefixIcon: Icon(Icons.search,color: Color.fromARGB(255, 255, 240, 223),),
+                  labelStyle: TextStyle(color: Color.fromARGB(255, 255, 240, 223)),
                 ),
+                style: TextStyle(color: Color.fromARGB(255, 255, 240, 223)),
               ),
             ),
 

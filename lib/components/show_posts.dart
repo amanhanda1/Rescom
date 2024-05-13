@@ -42,7 +42,7 @@ class _PostsWidgetState extends State<PostsWidget> {
             children: [
               const Center(child: Text("Posts",textAlign: TextAlign.center,
                   style: TextStyle(color: Color.fromARGB(255, 255, 240, 223)),)),
-              for (var index = 0; index < posts.length; index++)
+              for (var index = posts.length-1; index >= 0; index--)
                 _buildPostTile(posts[index], index)
             ],
           ),
@@ -63,9 +63,9 @@ class _PostsWidgetState extends State<PostsWidget> {
       ),
       subtitle: Row(
         children: [
-          Text(
-            'Posted by: ${post['username']} on ',
-            style: const TextStyle(
+          const Text(
+            'Posted on ',
+            style: TextStyle(
               fontStyle: FontStyle.italic,
               color: Color.fromARGB(224, 82, 81, 81),
             ),
@@ -81,7 +81,7 @@ class _PostsWidgetState extends State<PostsWidget> {
           ),
         ],
       ),
-      tileColor: const Color.fromARGB(118, 255, 255, 255),
+      tileColor: const Color.fromARGB(201, 255, 240, 223),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10.0),
         side: const BorderSide(color: Colors.black),
