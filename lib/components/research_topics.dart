@@ -13,6 +13,7 @@ class ResearchTopic {
 List<ResearchTopic> researchTopics = [
   ResearchTopic(id: '77', title: 'Blockchain'),
   ResearchTopic(id: '78', title: 'Business'),
+  ResearchTopic(id: '81', title: 'Accounts'),
   ResearchTopic(id: '79', title: 'Art'),
   ResearchTopic(id: '80', title: 'Entreprenuership'),
   ResearchTopic(id: '1', title: 'Women'),

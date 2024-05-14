@@ -50,11 +50,17 @@ class _UserListState extends State<UserList> {
         leading: Icon(Icons.person_add_alt_1),
         backgroundColor: const Color.fromARGB(128, 0, 128, 1),
         title: Center(
-          child: Text(
-            widget.role == 'Student' ? 'Student List' : 'Teacher List',
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
+  child: Text(
+    widget.role == 'Student'
+        ? 'Student List'
+        : widget.role == 'Teacher'
+            ? 'Teacher List'
+            : widget.role == 'Job'
+                ? 'Job List'
+                : 'Researcher List',
+    style: TextStyle(color: Colors.white),
+  ),
+),
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
@@ -116,7 +122,7 @@ class _UserListState extends State<UserList> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          data['university'],
+                          data['university']??data['role'],
                           style: TextStyle(color: Colors.white60),
                         ),
                         if (selectedTopics.isNotEmpty)

@@ -86,7 +86,7 @@ class _AddUserState extends State<AddUser> {
                   });
                 },
                 dropdownColor: Color.fromARGB(255, 26, 24, 46),
-                items: <String>['Student', 'Teacher']
+                items: <String>['Student', 'Teacher','Job','researcher']
                     .map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,

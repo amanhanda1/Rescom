@@ -213,7 +213,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     style:
                         const TextStyle(color: Color.fromARGB(255, 26, 24, 46)),
                     dropdownColor: Color.fromARGB(255, 26, 24, 46),
-                    items: <String>['Student', 'Teacher'] // Dropdown items
+                    items: <String>['Student', 'Teacher','Job','researcher'] // Dropdown items
                         .map<DropdownMenuItem<String>>((String value) {
                       return DropdownMenuItem<String>(
                         value: value,
