@@ -1,0 +1,40 @@
+name: Flutter CI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v1
+
+      - name: Setup Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'  # Adjusted to use Java 11
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v1
+        with:
+          channel: 'stable'  # Adjusted to use stable channel
+
+      - name: Get latest build number
+        id: get_build_number
+        run: echo "::set-output name=build_number::$(expr $(ls build/app/outputs/apk/release/app-release-*.apk 2>/dev/null | wc -l) + 1)"
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Flutter build APK
+        run: flutter build apk --release  # Adjusted to build release APK
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: release-apk-v${{ steps.get_build_number.outputs.build_number }}
+          path: build/app/outputs/flutter-apk/app-release.apk  # Adjusted APK path
