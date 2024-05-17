@@ -6,14 +6,18 @@ import 'package:resapp/pages/Profile_page.dart';
 
 class UserList extends StatefulWidget {
   final String role;
+  final String searchQuery;
 
-  const UserList({Key? key, required this.role}) : super(key: key);
+  const UserList({Key? key, required this.role, required this.searchQuery})
+      : super(key: key);
 
   @override
   _UserListState createState() => _UserListState();
 }
 
 class _UserListState extends State<UserList> {
+  String? _searchUniversity;
+
   bool _checkOnlineStatus(dynamic lastSeen) {
     if (lastSeen is Timestamp) {
       final currentTime = Timestamp.now();
@@ -50,34 +54,68 @@ class _UserListState extends State<UserList> {
         leading: Icon(Icons.person_add_alt_1),
         backgroundColor: const Color.fromARGB(128, 0, 128, 1),
         title: Center(
-  child: Text(
-    widget.role == 'Student'
-        ? 'Student List'
-        : widget.role == 'Teacher'
-            ? 'Teacher List'
-            : widget.role == 'Job'
-                ? 'Job List'
-                : 'Researcher List',
-    style: TextStyle(color: Colors.white),
-  ),
-),
+          child: Text(
+            widget.role == 'Student'
+                ? 'Student List'
+                : widget.role == 'Teacher'
+                    ? 'Teacher List'
+                    : widget.role == 'Job'
+                        ? 'Job List'
+                        : 'Researcher List',
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+        // actions: [
+        //   IconButton(
+        //     icon: Icon(Icons.filter_list),
+        //     onPressed: () {
+        //       _showFilterDialog(context);
+        //     },
+        //   ),
+        // ],
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('Users')
-            .where('role', isEqualTo: widget.role)
-            .snapshots(),
+        stream: widget.searchQuery.isEmpty
+            ? FirebaseFirestore.instance
+                .collection('Users')
+                .where('role', isEqualTo: widget.role)
+                .snapshots()
+            : FirebaseFirestore.instance
+                .collection('Users')
+                .where('role', isEqualTo: widget.role)
+                .where('username', isGreaterThanOrEqualTo: widget.searchQuery)
+                .where('username', isLessThan: widget.searchQuery + 'z')
+                .snapshots(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            print(snapshot.error);
+            return Center(
+                child: Text(
+              'Error: ${snapshot.error}',
+              style: TextStyle(color: Colors.white),
+            ));
           }
 
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           }
 
+          if (!snapshot.hasData) {
+            return Center(
+              child: Text(
+                'No users found',
+                style: TextStyle(color: Colors.white),
+              ),
+            );
+          }
+
           if (snapshot.data!.docs.isEmpty) {
-            return Center(child: Text('No ${widget.role}s found'));
+            return Center(
+              child: Text(
+                'No users found',
+                style: TextStyle(color: Colors.white),
+              ),
+            );
           }
 
           return ListView.builder(
@@ -122,7 +160,7 @@ class _UserListState extends State<UserList> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          data['university']??data['role'],
+                          data['university'] ?? data['role'],
                           style: TextStyle(color: Colors.white60),
                         ),
                         if (selectedTopics.isNotEmpty)
@@ -142,3 +180,40 @@ class _UserListState extends State<UserList> {
     );
   }
 }
+//   void _showFilterDialog(BuildContext context) {
+//   showDialog(
+//     context: context,
+//     builder: (BuildContext context) {
+//       return AlertDialog(
+//         title: Text('Filter by University'),
+//         content: TextField(
+//           onChanged: (value) {
+//             setState(() {
+//               _searchUniversity = value.trim();
+//             });
+//           },
+//           decoration: InputDecoration(
+//             hintText: 'Enter University Name',
+//           ),
+//         ),
+//         actions: <Widget>[
+//           TextButton(
+//             child: Text('Clear'),
+//             onPressed: () {
+//               setState(() {
+//                 _searchUniversity = null;
+//               });
+//               Navigator.of(context).pop();
+//             },
+//           ),
+//           TextButton(
+//             child: Text('Apply'),
+//             onPressed: () {
+//               Navigator.of(context).pop();
+//             },
+//           ),
+//         ],
+//       );
+//     },
+//   );
+// }

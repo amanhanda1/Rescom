@@ -174,6 +174,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                     controller: _messageController,
                     decoration:
                         const InputDecoration(hintText: 'Type your message...'),
+                        style: TextStyle(color: Color.fromARGB(255, 255, 240, 223)),
                   ),
                 ),
                 IconButton(

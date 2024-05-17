@@ -133,11 +133,13 @@ class _sameUniUsersState extends State<sameUniUsers> {
                     ),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          data['role'] ?? "old",
-                          style: TextStyle(color: Colors.white60),
-                        ),
+                      
+                          children: [
+                            Text(
+                              data['role'] ?? "old",
+                              style: TextStyle(color: Colors.white60),
+                            ),
+                            
                         if (selectedTopics.isNotEmpty)
                           Text(
                             'Research Topics: $topicTitles' ,

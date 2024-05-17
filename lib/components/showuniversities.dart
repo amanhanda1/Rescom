@@ -123,7 +123,7 @@ class UniversityListScreenState extends State<UniversityListScreen> {
             ),
 
             Expanded(
-              child: filteredUniversities.isEmpty
+              child:     filteredUniversities.isEmpty
                   ? const Center(
                       child: Text(
                         "No universities found",

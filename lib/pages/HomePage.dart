@@ -37,6 +37,7 @@ class HomePage extends StatelessWidget {
           backgroundColor: const Color.fromARGB(255, 26, 24, 46),
           appBar: AppBar(
             backgroundColor: const Color.fromARGB(128, 0, 128, 1),
+            leading: const Icon(Icons.home),
             title: const Text(
               "P O S T S",
               style: TextStyle(color: const Color.fromARGB(255, 255, 240, 223)),
