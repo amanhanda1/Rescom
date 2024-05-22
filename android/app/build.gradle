@@ -24,8 +24,8 @@ android {
         applicationId = "com.example.resapp"
         minSdk = 21 // Or flutter.minSdkVersion if defined
         targetSdk = 33
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+        versionCode 1 // Replace with your desired version code
+        versionName "1.0.0"
     }
 
     buildTypes {
