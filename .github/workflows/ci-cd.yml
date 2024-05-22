@@ -21,7 +21,8 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v1
         with:
-          channel: 'stable'  # Adjusted to use stable channel
+          channel: 'stable'
+          flutter-version: 3.19.0  # Adjusted to use stable channel
 
       - name: Get latest build number
         id: get_build_number
