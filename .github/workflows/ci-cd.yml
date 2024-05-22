@@ -11,15 +11,16 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
 
       - name: Setup Java
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v2
         with:
           java-version: '11'  # Adjusted to use Java 11
+          distribution: 'temurin'
 
       - name: Setup Flutter
-        uses: subosito/flutter-action@v1
+        uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
           flutter-version: 3.19.0  # Adjusted to use stable channel
