@@ -54,7 +54,15 @@ class _HomePageState extends State<HomePage> {
         ),
       );
     }
-
+    Future<void> _refreshHome() async {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomePage(),
+        ),
+      );
+      await Future.delayed(Duration(seconds: 2));
+    }
     void navigateToHomePage() {}
     return Scaffold(
         backgroundColor: const Color.fromARGB(255, 26, 24, 46),
@@ -73,95 +81,98 @@ class _HomePageState extends State<HomePage> {
             style: TextStyle(color: const Color.fromARGB(255, 255, 240, 223)),
           ),
         ),
-        body: StreamBuilder<QuerySnapshot>(
-          stream: FirebaseFirestore.instance.collection('Posts').snapshots(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            if (snapshot.hasError) {
-              return Center(child: Text("Error: ${snapshot.error}"));
-            }
-
-            final posts = snapshot.data?.docs ?? [];
-
-            return ListView.builder(
-              itemCount: posts.length,
-              itemBuilder: (context, index) {
-                final post = posts[index].data() as Map<String, dynamic>;
-                final useId = post['userId'] as String;
-
-                return FutureBuilder<DocumentSnapshot>(
-                  future: FirebaseFirestore.instance
-                      .collection('Users')
-                      .doc(useId)
-                      .get(),
-                  builder: (context, userSnapshot) {
-                    if (userSnapshot.connectionState ==
-                        ConnectionState.waiting) {
-                      return const CircularProgressIndicator();
-                    }
-
-                    if (userSnapshot.hasError || !userSnapshot.hasData) {
-                      return Container();
-                    }
-
-                    final userData =
-                        userSnapshot.data?.data() as Map<String, dynamic>?;
-
-                    return Card(
-                      elevation: 5,
-                      margin: const EdgeInsets.symmetric(
-                          vertical: 8, horizontal: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      color: Colors.white.withOpacity(0.26),
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.all(16),
+        body: RefreshIndicator(
+          onRefresh: () => _refreshHome(),
+          child: StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance.collection('Posts').snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+          
+              if (snapshot.hasError) {
+                return Center(child: Text("Error: ${snapshot.error}"));
+              }
+          
+              final posts = snapshot.data?.docs ?? [];
+          
+              return ListView.builder(
+                itemCount: posts.length,
+                itemBuilder: (context, index) {
+                  final post = posts[index].data() as Map<String, dynamic>;
+                  final useId = post['userId'] as String;
+          
+                  return FutureBuilder<DocumentSnapshot>(
+                    future: FirebaseFirestore.instance
+                        .collection('Users')
+                        .doc(useId)
+                        .get(),
+                    builder: (context, userSnapshot) {
+                      if (userSnapshot.connectionState ==
+                          ConnectionState.waiting) {
+                        return const CircularProgressIndicator();
+                      }
+          
+                      if (userSnapshot.hasError || !userSnapshot.hasData) {
+                        return Container();
+                      }
+          
+                      final userData =
+                          userSnapshot.data?.data() as Map<String, dynamic>?;
+          
+                      return Card(
+                        elevation: 5,
+                        margin: const EdgeInsets.symmetric(
+                            vertical: 8, horizontal: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        title: Text(
-                          post['text'] ?? '',
-                          style: TextStyle(
-                              fontFamily: GoogleFonts.nunito().fontFamily,
-                              fontSize: 21,
-                              fontWeight: FontWeight.w700,
-                              color: const Color.fromARGB(255, 255, 240, 223)),
+                        color: Colors.white.withOpacity(0.26),
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.all(16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          title: Text(
+                            post['text'] ?? '',
+                            style: TextStyle(
+                                fontFamily: GoogleFonts.nunito().fontFamily,
+                                fontSize: 21,
+                                fontWeight: FontWeight.w700,
+                                color: const Color.fromARGB(255, 255, 240, 223)),
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                  'Posted by: ${userData?['username'] ?? 'Unknown User'}',
+                                  style: TextStyle(
+                                      fontFamily:
+                                          GoogleFonts.aBeeZee().fontFamily,
+                                      fontSize: 12,
+                                      color: Color.fromARGB(255, 164, 159, 152))),
+                              Text(
+                                  _formatDateTime(
+                                      post['timestamp'] as Timestamp? ??
+                                          Timestamp.now()),
+                                  style: TextStyle(
+                                      fontFamily:
+                                          GoogleFonts.lobster().fontFamily,
+                                      fontSize: 9.8,
+                                      color: Color.fromARGB(255, 164, 159, 152)))
+                            ],
+                          ),
+                          onTap: () {
+                            navigateToProfilePage(useId);
+                          },
                         ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                                'Posted by: ${userData?['username'] ?? 'Unknown User'}',
-                                style: TextStyle(
-                                    fontFamily:
-                                        GoogleFonts.aBeeZee().fontFamily,
-                                    fontSize: 12,
-                                    color: Color.fromARGB(255, 164, 159, 152))),
-                            Text(
-                                _formatDateTime(
-                                    post['timestamp'] as Timestamp? ??
-                                        Timestamp.now()),
-                                style: TextStyle(
-                                    fontFamily:
-                                        GoogleFonts.lobster().fontFamily,
-                                    fontSize: 9.8,
-                                    color: Color.fromARGB(255, 164, 159, 152)))
-                          ],
-                        ),
-                        onTap: () {
-                          navigateToProfilePage(useId);
-                        },
-                      ),
-                    );
-                  },
-                );
-              },
-            );
-          },
+                      );
+                    },
+                  );
+                },
+              );
+            },
+          ),
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {

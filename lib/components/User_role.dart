@@ -51,18 +51,18 @@ class _UserListState extends State<UserList> {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 26, 24, 46),
       appBar: AppBar(
-        leading: Icon(Icons.person_add_alt_1),
+        leading: Icon(Icons.person_add_alt_1,color: const Color.fromARGB(255, 255, 240, 223)),
         backgroundColor: const Color.fromARGB(128, 0, 128, 1),
         title: Center(
           child: Text(
             widget.role == 'Student'
-                ? 'Student List'
+                ? 'Students List'
                 : widget.role == 'Teacher'
-                    ? 'Teacher List'
+                    ? 'Teachers List'
                     : widget.role == 'Job'
                         ? 'Job List'
-                        : 'Researcher List',
-            style: TextStyle(color: Colors.white),
+                        : 'Researchers List',
+            style: TextStyle(color: Color.fromARGB(255, 255, 240, 223)),
           ),
         ),
         // actions: [

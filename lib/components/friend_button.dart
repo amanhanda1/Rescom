@@ -159,7 +159,7 @@ class _FriendButtonState extends State<FriendButton> {
           ),
         ),
         child: Text(
-          isFriend ? 'Remove Support' : 'Add Support',
+          isFriend ? 'Following' : 'Follow',
           style: const TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
         ),
       ),

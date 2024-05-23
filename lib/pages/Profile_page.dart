@@ -70,6 +70,15 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     );
   }
+  Future<void> _refreshProfile(userId) async {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ProfilePage(userId: userId),
+        ),
+      );
+      await Future.delayed(Duration(seconds: 2));
+    }
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +87,8 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 26, 24, 46),
       appBar: AppBar(
-        leading: const Icon(Icons.person_outlined),
+        leading: const Icon(Icons.person_outlined,
+        color: const Color.fromARGB(255, 255, 240, 223)),
         backgroundColor: const Color.fromARGB(128, 0, 128, 1),
         title: const Row(
           children: [
@@ -131,7 +141,10 @@ class _ProfilePageState extends State<ProfilePage> {
               ]
             : null,
       ),
-      body: FutureBuilder<DocumentSnapshot>(
+      body: RefreshIndicator(
+        onRefresh: () =>
+            _refreshProfile(FirebaseAuth.instance.currentUser!.uid),
+        child:FutureBuilder<DocumentSnapshot>(
         future: FirebaseFirestore.instance
             .collection("Users")
             .doc(widget.userId)
@@ -329,7 +342,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           );
         },
-      ),
+      ),),
       bottomNavigationBar: cNavigationBar(
         onProfileIconPressed: () =>
             navigateToProfilePage(FirebaseAuth.instance.currentUser!.uid),
