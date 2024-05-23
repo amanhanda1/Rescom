@@ -21,11 +21,14 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   final TextEditingController _messageController = TextEditingController();
   String _receiverUsername = '';
   bool _isHovering = false;
+  bool _canSendMessage = true;
+  final MessagingService _messagingService = MessagingService();
 
   @override
   void initState() {
     super.initState();
-    _fetchReceiverUsername(); // Fetch the receiver's username when the widget initializes
+    _fetchReceiverUsername();
+    _checkMessagePermission();
   }
 
   Future<void> _fetchReceiverUsername() async {
@@ -41,9 +44,16 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     }
   }
 
-  String generateConversationId(String senderUserId, String receiverUserId) {
-    List<String> userIds = [senderUserId, receiverUserId]..sort();
-    return '${userIds[0]}_${userIds[1]}';
+  Future<void> _checkMessagePermission() async {
+    try {
+      bool canSendMessage = await _messagingService.canSendMessage(
+          widget.senderUserId, widget.receiverUserId);
+      setState(() {
+        _canSendMessage = canSendMessage;
+      });
+    } catch (e) {
+      print('Error checking message permission: $e');
+    }
   }
 
   @override
@@ -62,7 +72,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(128, 0, 128, 1),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios),
+          icon: const Icon(Icons.arrow_back_ios,color: const Color.fromARGB(255, 255, 240, 223),),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -97,7 +107,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                   ),
                   child: Text(
                     _receiverUsername.toUpperCase() + ' >',
-                    style: const TextStyle(fontSize: 22, color: Colors.black),
+                    style: const TextStyle(fontSize: 22, color: const Color.fromARGB(255, 255, 240, 223)),
                   ),
                 ),
               ),
@@ -109,7 +119,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
         children: [
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: MessagingService().getMessages(
+              stream: _messagingService.getMessages(
                 senderUserId: widget.senderUserId,
                 receiverUserId: widget.receiverUserId,
               ),
@@ -149,9 +159,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: GestureDetector(
-                            onLongPress: () {
-                              
-                            },
+                            onLongPress: () {},
                             child: Text(
                               message,
                               style: const TextStyle(color: Colors.white),
@@ -172,24 +180,44 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                 Expanded(
                   child: TextField(
                     controller: _messageController,
-                    decoration:
-                        const InputDecoration(hintText: 'Type your message...'),
-                        style: TextStyle(color: Color.fromARGB(255, 255, 240, 223)),
+                    decoration: InputDecoration(
+                      hintText: _canSendMessage
+                          ? 'Type your message...'
+                          : 'You can only send one message before they follow you',
+                      hintStyle: const TextStyle(
+                        color: Color.fromARGB(255, 255, 240, 223),
+                      ),
+                    ),
+                    style: const TextStyle(color: Color.fromARGB(255, 255, 240, 223)),
+                    enabled: _canSendMessage,
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.send),
-                  onPressed: () {
-                    final String message = _messageController.text.trim();
-                    if (message.isNotEmpty) {
-                      MessagingService().sendMessage(
-                        senderUserId: widget.senderUserId,
-                        receiverUserId: widget.receiverUserId,
-                        message: message,
-                      );
-                      _messageController.clear();
-                    }
-                  },
+                  icon: const Icon(Icons.send,color: const Color.fromARGB(255, 255, 240, 223)),
+                  onPressed: _canSendMessage
+                      ? () async {
+                          final String message = _messageController.text.trim();
+                          if (message.isNotEmpty) {
+                            try {
+                              await _messagingService.sendMessage(
+                                senderUserId: widget.senderUserId,
+                                receiverUserId: widget.receiverUserId,
+                                message: message,
+                              );
+                              _messageController.clear();
+                              _checkMessagePermission(); // Recheck permission after sending message
+                            } catch (e) {
+                              print('Error: $e');
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                      'Error: You can\'t send more than one message until you are followed.'),
+                                ),
+                              );
+                            }
+                          }
+                        }
+                      : null,
                 ),
               ],
             ),

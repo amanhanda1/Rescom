@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MessagingService {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   // Fetch messages between two users
   Stream<QuerySnapshot> getMessages({
     required String senderUserId,
@@ -10,7 +12,7 @@ class MessagingService {
       String conversationId =
           generateConversationId(senderUserId, receiverUserId);
       // Fetch messages from the Messages subcollection under the conversation document
-      return FirebaseFirestore.instance
+      return _firestore
           .collection('Conversations')
           .doc(conversationId)
           .collection('Messages')
@@ -31,7 +33,15 @@ class MessagingService {
     try {
       String conversationId =
           generateConversationId(senderUserId, receiverUserId);
-      await FirebaseFirestore.instance
+      
+      // Check if sender is allowed to send a message
+      bool CanSendMessage = await canSendMessage(senderUserId, receiverUserId);
+
+      if (!CanSendMessage) {
+        throw Exception("You can't send more than one message until you are followed.");
+      }
+
+      await _firestore
           .collection('Conversations')
           .doc(conversationId)
           .collection('Messages')
@@ -40,9 +50,10 @@ class MessagingService {
         'receiverUserId': receiverUserId,
         'message': message,
         'timestamp': FieldValue.serverTimestamp(),
-        'seen':false
+        'seen': false,
       });
-      await FirebaseFirestore.instance
+
+      await _firestore
           .collection('Users')
           .doc(receiverUserId)
           .collection('Conversations')
@@ -52,7 +63,8 @@ class MessagingService {
         'receiverUserId': receiverUserId,
         'senderUserId': senderUserId,
       });
-      await FirebaseFirestore.instance
+
+      await _firestore
           .collection('Users')
           .doc(senderUserId)
           .collection('Conversations')
@@ -72,5 +84,39 @@ class MessagingService {
   String generateConversationId(String senderUserId, String receiverUserId) {
     List<String> userIds = [senderUserId, receiverUserId]..sort();
     return '${userIds[0]}_${userIds[1]}';
+  }
+
+  // Check if sender is followed by receiver
+  Future<bool> isFollowing(String senderUserId, String receiverUserId) async {
+    final doc = await _firestore
+        .collection('Users')
+        .doc(receiverUserId)
+        .collection('Supportings')
+        .doc(senderUserId)
+        .get();
+    return doc.exists;
+  }
+
+  // Count messages sent by sender to receiver
+  Future<int> countMessages(String senderUserId, String receiverUserId) async {
+    String conversationId = generateConversationId(senderUserId, receiverUserId);
+    final querySnapshot = await _firestore
+        .collection('Conversations')
+        .doc(conversationId)
+        .collection('Messages')
+        .where('senderUserId', isEqualTo: senderUserId)
+        .get();
+    return querySnapshot.docs.length;
+  }
+
+  // Check if sender can send a message
+  Future<bool> canSendMessage(String senderUserId, String receiverUserId) async {
+    bool isFollowed = await isFollowing(senderUserId, receiverUserId);
+    if (isFollowed) {
+      return true;
+    } else {
+      int messageCount = await countMessages(senderUserId, receiverUserId);
+      return messageCount < 1;
+    }
   }
 }

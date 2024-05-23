@@ -60,7 +60,7 @@ class _allMessagesState extends State<allMessages> {
         leading: const Icon(Icons.message_outlined,color: Color.fromARGB(255, 255, 240, 223)),
         title: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [Text("C H A T  S",style: TextStyle(color: Color.fromARGB(255, 255, 240, 223)),)],
+          children: [Text("C H A T S",style: TextStyle(color: Color.fromARGB(255, 255, 240, 223)),)],
         ), 
       ),
       body: Column(
