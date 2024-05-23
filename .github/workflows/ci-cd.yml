@@ -34,5 +34,11 @@ jobs:
 
       - name: Flutter build APK
         run: flutter build apk --release  # Adjusted to build release APK
+        
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v1
+        mwith:
+          name: release-apk-v${{ steps.get_build_number.outputs.build_number }}
+          path: build/app/outputs/flutter-apk/app-release.apk  # Adjusted APK path
 
       

@@ -55,13 +55,13 @@ class _allMessagesState extends State<allMessages> {
     final currentUser = FirebaseAuth.instance.currentUser;
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 26, 24, 46),
-      appBar: AppBar(
+      appBar: AppBar( 
         backgroundColor: const Color.fromARGB(128, 0, 128, 1),
-        leading: const Icon(Icons.message_outlined),
+        leading: const Icon(Icons.message_outlined,color: Color.fromARGB(255, 255, 240, 223)),
         title: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [Text("ZINSA")],
-        ),
+          children: [Text("C H A T  S",style: TextStyle(color: Color.fromARGB(255, 255, 240, 223)),)],
+        ), 
       ),
       body: Column(
         children: [

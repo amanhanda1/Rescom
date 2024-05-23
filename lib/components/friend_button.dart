@@ -95,7 +95,7 @@ class _FriendButtonState extends State<FriendButton> {
     final notificationData = {
       'user': currentUser.uid,
       'timestamp': FieldValue.serverTimestamp(),
-      'message': '$currentUsername added you as a friend',
+      'message': '$currentUsername followed you',
       'userId': currentUser.uid,
     };
     await FirebaseFirestore.instance
