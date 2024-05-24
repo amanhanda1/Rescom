@@ -30,7 +30,7 @@ class _sameUniUsersState extends State<sameUniUsers> {
     setState(() {
       currentUniversity = userSnapshot['university'] ?? '';
     });
-    }
+  }
 
   bool _checkOnlineStatus(dynamic lastSeen) {
     if (lastSeen is Timestamp) {
@@ -112,6 +112,10 @@ class _sameUniUsersState extends State<sameUniUsers> {
                           orElse: () => ResearchTopic(id: id, title: id))
                       .title)
                   .join(', ');
+              if (FirebaseAuth.instance.currentUser != null &&
+                  data['uid'] == FirebaseAuth.instance.currentUser!.uid) {
+                return SizedBox.shrink(); // Skip this user
+              }
               return GestureDetector(
                 onTap: () {
                   navigateToProfilePage(data['uid']);
@@ -127,23 +131,28 @@ class _sameUniUsersState extends State<sameUniUsers> {
                         color: dotColor,
                       ),
                     ),
-                    title: Text(
-                      data['username'],
-                      style: TextStyle(color: Colors.white),
-                    ),
+                    title: Text(data['username'],
+                        style: isOnline
+                            ? TextStyle(color: Color.fromARGB(207, 26, 24, 46))
+                            : TextStyle(color: Colors.white
+                                )),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      
-                          children: [
-                            Text(
-                              data['role'] ?? "old",
-                              style: TextStyle(color: Colors.white60),
-                            ),
-                            
+                      children: [
+                        Text(
+                          data['role'] ?? "old",
+                          style: isOnline
+                            ? TextStyle(color: Color.fromARGB(151, 26, 24, 46))
+                            : TextStyle(color: Colors.white60
+                                )
+                        ),
                         if (selectedTopics.isNotEmpty)
                           Text(
-                            'Research Topics: $topicTitles' ,
-                            style: TextStyle(color: Colors.white60),
+                            'Research Topics: $topicTitles',
+                            style: isOnline
+                            ? TextStyle(color: Color.fromARGB(151, 26, 24, 46))
+                            : TextStyle(color: Colors.white60
+                                )
                           ),
                       ],
                     ),

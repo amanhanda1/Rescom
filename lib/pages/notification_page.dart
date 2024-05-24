@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:resapp/components/friend_button.dart';
-import 'package:resapp/pages/profile_page.dart';
+import 'package:resapp/pages/Profile_page.dart';
 
 class NotificationPage extends StatefulWidget {
   final String userId; // Add a parameter to accept the user ID

@@ -105,6 +105,10 @@ class _UsersPageState extends State<UsersPage> {
                                 orElse: () => ResearchTopic(id: id, title: id))
                             .title)
                         .join(', ');
+                        if (FirebaseAuth.instance.currentUser != null &&
+                  userData['uid'] == FirebaseAuth.instance.currentUser!.uid) {
+                return SizedBox.shrink(); // Skip this user
+              }
 
                     return GestureDetector(
                       onTap: () {
@@ -121,21 +125,28 @@ class _UsersPageState extends State<UsersPage> {
                               color: dotColor,
                             ),
                           ),
-                          title: Text(
-                            userData['username'],
-                            style: TextStyle(color: Colors.white),
-                          ),
+                          title: Text(userData['username'],
+                        style: isOnline
+                            ? TextStyle(color: const Color.fromARGB(255, 26, 24, 46))
+                            : TextStyle(color: Colors.white
+                                )),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 userData['university'],
-                                style: TextStyle(color: Colors.white60),
+                                style: isOnline
+                            ? TextStyle(color: Color.fromARGB(151, 26, 24, 46))
+                            : TextStyle(color: Colors.white60
+                                )
                               ),
                               if (selectedTopics.isNotEmpty)
                                 Text(
                                   'Research Topics: $topicTitles',
-                                  style: TextStyle(color: Colors.white60),
+                                  style: isOnline
+                            ? TextStyle(color: Color.fromARGB(151, 26, 24, 46))
+                            : TextStyle(color: Colors.white60
+                                )
                                 ),
                             ],
                           ),

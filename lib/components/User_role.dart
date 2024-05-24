@@ -16,8 +16,6 @@ class UserList extends StatefulWidget {
 }
 
 class _UserListState extends State<UserList> {
-  String? _searchUniversity;
-
   bool _checkOnlineStatus(dynamic lastSeen) {
     if (lastSeen is Timestamp) {
       final currentTime = Timestamp.now();
@@ -51,7 +49,8 @@ class _UserListState extends State<UserList> {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 26, 24, 46),
       appBar: AppBar(
-        leading: Icon(Icons.person_add_alt_1,color: const Color.fromARGB(255, 255, 240, 223)),
+        leading: Icon(Icons.person_add_alt_1,
+            color: const Color.fromARGB(255, 255, 240, 223)),
         backgroundColor: const Color.fromARGB(128, 0, 128, 1),
         title: Center(
           child: Text(
@@ -137,6 +136,10 @@ class _UserListState extends State<UserList> {
                           orElse: () => ResearchTopic(id: id, title: id))
                       .title)
                   .join(', ');
+              if (FirebaseAuth.instance.currentUser != null &&
+                  data['uid'] == FirebaseAuth.instance.currentUser!.uid) {
+                return SizedBox.shrink(); // Skip this user
+              }
               return GestureDetector(
                 onTap: () {
                   navigateToProfilePage(data['uid']);
@@ -152,22 +155,25 @@ class _UserListState extends State<UserList> {
                         color: dotColor,
                       ),
                     ),
-                    title: Text(
-                      data['username'],
-                      style: TextStyle(color: Colors.white),
-                    ),
+                    title: Text(data['username'],
+                        style: isOnline
+                            ? TextStyle(
+                                color: const Color.fromARGB(255, 26, 24, 46))
+                            : TextStyle(color: Colors.white)),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          data['university'] ?? data['role'],
-                          style: TextStyle(color: Colors.white60),
-                        ),
+                        Text(data['university'] ?? data['role'],
+                            style: isOnline
+                                ? TextStyle(
+                                    color: Color.fromARGB(151, 26, 24, 46))
+                                : TextStyle(color: Colors.white60)),
                         if (selectedTopics.isNotEmpty)
-                          Text(
-                            'Research Topics: $topicTitles',
-                            style: TextStyle(color: Colors.white60),
-                          ),
+                          Text('Research Topics: $topicTitles',
+                              style: isOnline
+                                  ? TextStyle(
+                                      color: Color.fromARGB(151, 26, 24, 46))
+                                  : TextStyle(color: Colors.white60)),
                       ],
                     ),
                   ),

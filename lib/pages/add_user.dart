@@ -1,4 +1,3 @@
-import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -21,13 +20,12 @@ class AddUser extends StatefulWidget {
 class _AddUserState extends State<AddUser> {
   String _selectedRole = 'Student';
   String _searchQuery = '';
-  Timer? _debounce;
 
- void _handleSearch(String query) {
-  setState(() {
-    _searchQuery = query;
-  });
-}
+  void _handleSearch(String query) {
+    setState(() {
+      _searchQuery = query;
+    });
+  }
 
   void navigateToAddUser() {}
   void navigateToProfilePage(String userId) {
