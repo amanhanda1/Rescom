@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:resapp/components/Profile_photo.dart';
 import 'package:resapp/components/research_topics.dart';
 import 'package:resapp/pages/Profile_page.dart';
 
@@ -112,6 +113,10 @@ class _sameUniUsersState extends State<sameUniUsers> {
                           orElse: () => ResearchTopic(id: id, title: id))
                       .title)
                   .join(', ');
+                  String? photoUrl = data.containsKey('photoUrl')
+                        ? data['photoUrl']
+                        : null;
+                    final otherUserId = data['uid'];
               if (FirebaseAuth.instance.currentUser != null &&
                   data['uid'] == FirebaseAuth.instance.currentUser!.uid) {
                 return SizedBox.shrink(); // Skip this user
@@ -123,7 +128,15 @@ class _sameUniUsersState extends State<sameUniUsers> {
                 child: Card(
                   color: cardColor,
                   child: ListTile(
-                    leading: Container(
+                    leading: CircleAvatar(
+                            radius: 28,
+                            backgroundColor: Colors.grey.shade300,
+                            child: ProfilePhotoWidget(
+                              photoUrl: photoUrl,
+                              userId: otherUserId,
+                            ),
+                          ),
+                    trailing: Container(
                       width: 10,
                       height: 10,
                       decoration: BoxDecoration(

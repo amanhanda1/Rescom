@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:resapp/components/Profile_photo.dart';
 import 'package:resapp/components/research_topics.dart';
 import 'package:resapp/pages/Profile_page.dart';
 
@@ -105,10 +106,15 @@ class _UsersPageState extends State<UsersPage> {
                                 orElse: () => ResearchTopic(id: id, title: id))
                             .title)
                         .join(', ');
-                        if (FirebaseAuth.instance.currentUser != null &&
-                  userData['uid'] == FirebaseAuth.instance.currentUser!.uid) {
-                return SizedBox.shrink(); // Skip this user
-              }
+                    String? photoUrl = userData.containsKey('photoUrl')
+                        ? userData['photoUrl']
+                        : null;
+                    final otherUserId = userData['uid'];
+                    if (FirebaseAuth.instance.currentUser != null &&
+                        userData['uid'] ==
+                            FirebaseAuth.instance.currentUser!.uid) {
+                      return SizedBox.shrink(); // Skip this user
+                    }
 
                     return GestureDetector(
                       onTap: () {
@@ -117,7 +123,15 @@ class _UsersPageState extends State<UsersPage> {
                       child: Card(
                         color: cardColor,
                         child: ListTile(
-                          leading: Container(
+                          leading: CircleAvatar(
+                            radius: 28,
+                            backgroundColor: Colors.grey.shade300,
+                            child: ProfilePhotoWidget(
+                              photoUrl: photoUrl,
+                              userId: otherUserId,
+                            ),
+                          ),
+                          trailing: Container(
                             width: 10,
                             height: 10,
                             decoration: BoxDecoration(
@@ -126,28 +140,27 @@ class _UsersPageState extends State<UsersPage> {
                             ),
                           ),
                           title: Text(userData['username'],
-                        style: isOnline
-                            ? TextStyle(color: const Color.fromARGB(255, 26, 24, 46))
-                            : TextStyle(color: Colors.white
-                                )),
+                              style: isOnline
+                                  ? TextStyle(
+                                      color:
+                                          const Color.fromARGB(255, 26, 24, 46))
+                                  : TextStyle(color: Colors.white)),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                userData['university'],
-                                style: isOnline
-                            ? TextStyle(color: Color.fromARGB(151, 26, 24, 46))
-                            : TextStyle(color: Colors.white60
-                                )
-                              ),
-                              if (selectedTopics.isNotEmpty)
-                                Text(
-                                  'Research Topics: $topicTitles',
+                              Text(userData['university'] ?? '',
                                   style: isOnline
-                            ? TextStyle(color: Color.fromARGB(151, 26, 24, 46))
-                            : TextStyle(color: Colors.white60
-                                )
-                                ),
+                                      ? TextStyle(
+                                          color:
+                                              Color.fromARGB(151, 26, 24, 46))
+                                      : TextStyle(color: Colors.white60)),
+                              if (selectedTopics.isNotEmpty)
+                                Text('Research Topics: $topicTitles',
+                                    style: isOnline
+                                        ? TextStyle(
+                                            color:
+                                                Color.fromARGB(151, 26, 24, 46))
+                                        : TextStyle(color: Colors.white60)),
                             ],
                           ),
                         ),
