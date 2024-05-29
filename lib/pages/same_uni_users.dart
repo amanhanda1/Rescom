@@ -129,7 +129,7 @@ class _sameUniUsersState extends State<sameUniUsers> {
                   color: cardColor,
                   child: ListTile(
                     leading: CircleAvatar(
-                            radius: 28,
+                            radius: 24,
                             backgroundColor: Colors.grey.shade300,
                             child: ProfilePhotoWidget(
                               photoUrl: photoUrl,

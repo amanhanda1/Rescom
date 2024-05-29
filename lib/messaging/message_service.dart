@@ -16,7 +16,7 @@ class MessagingService {
           .collection('Conversations')
           .doc(conversationId)
           .collection('Messages')
-          .orderBy('timestamp', descending: true)
+          .orderBy('timestamp', descending: false)
           .snapshots();
     } catch (e) {
       print('Error getting messages: $e');
@@ -62,6 +62,7 @@ class MessagingService {
         'conversationId': conversationId,
         'receiverUserId': receiverUserId,
         'senderUserId': senderUserId,
+        'timestamp': FieldValue.serverTimestamp(),
       });
 
       await _firestore
@@ -72,7 +73,8 @@ class MessagingService {
           .set({
         'conversationId': conversationId,
         'receiverUserId': receiverUserId,
-        'senderUserId': senderUserId, // Add sender's ID
+        'senderUserId': senderUserId, 
+        'timestamp': FieldValue.serverTimestamp(),// Add sender's ID
       });
     } catch (e) {
       print('Error sending message: $e');

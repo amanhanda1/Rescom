@@ -13,21 +13,31 @@ class FriendButton extends StatefulWidget {
 }
 
 class _FriendButtonState extends State<FriendButton> {
-  late bool isFriend = false;
+  bool isFriend = false;
 
   @override
   void initState() {
-    super.initState(); // Initialize with a default value
+    super.initState();
     _loadFriendStatus();
   }
 
   Future<void> _loadFriendStatus() async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) {
+      return;
+    }
+
     final prefs = await SharedPreferences.getInstance();
     final storedStatus = prefs.getBool('friendStatus_${widget.userId}');
-    setState(() {
-      isFriend = storedStatus ?? false; // Default to false if not found
-    });
-    // Remove checkFriendStatus() from here as it's already called in setState
+
+    if (storedStatus != null) {
+      setState(() {
+        isFriend = storedStatus;
+      });
+    } else {
+      // If no local data, check Firestore and update SharedPreferences
+      await checkFriendStatus();
+    }
   }
 
   Future<void> checkFriendStatus() async {
@@ -36,17 +46,17 @@ class _FriendButtonState extends State<FriendButton> {
       return;
     }
 
-    final userDoc =
-        FirebaseFirestore.instance.collection('Users').doc(currentUser.uid);
-    final friendDoc = userDoc.collection('Friends').doc(widget.userId);
+    final userDoc = FirebaseFirestore.instance.collection('Users').doc(currentUser.uid);
+    final friendDoc = userDoc.collection('Supportings').doc(widget.userId);
     final friendSnapshot = await friendDoc.get();
     final prefs = await SharedPreferences.getInstance();
 
-    // Update SharedPreferences here
-    await prefs.setBool('friendStatus_${widget.userId}', friendSnapshot.exists);
+    final isFriendStatus = friendSnapshot.exists;
+
+    await prefs.setBool('friendStatus_${widget.userId}', isFriendStatus);
 
     setState(() {
-      isFriend = friendSnapshot.exists;
+      isFriend = isFriendStatus;
     });
   }
 
@@ -56,10 +66,7 @@ class _FriendButtonState extends State<FriendButton> {
       return;
     }
 
-    final userDoc = await FirebaseFirestore.instance
-        .collection('Users')
-        .doc(currentUser.uid)
-        .get();
+    final userDoc = await FirebaseFirestore.instance.collection('Users').doc(currentUser.uid).get();
     final currentUsername = userDoc.data()?['username'];
 
     if (currentUsername == null) {
@@ -71,23 +78,27 @@ class _FriendButtonState extends State<FriendButton> {
         .doc(widget.userId)
         .collection('Friends')
         .doc(currentUser.uid);
-    final sprtingDoc = FirebaseFirestore.instance
+    final supportingDoc = FirebaseFirestore.instance
         .collection('Users')
         .doc(currentUser.uid)
         .collection('Supportings')
         .doc(widget.userId);
+
     final friendData = {
       'friendId': currentUser.uid,
       'timestamp': FieldValue.serverTimestamp(),
     };
-    final sprtData = {
+    final supportingData = {
       'friendId': widget.userId,
       'timestamp': FieldValue.serverTimestamp(),
     };
+
     await friendDoc.set(friendData);
-    await sprtingDoc.set(sprtData); // Set supporting data using friend's ID
+    await supportingDoc.set(supportingData);
+
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('friendStatus_${widget.userId}', true);
+
     setState(() {
       isFriend = true;
     });
@@ -98,6 +109,7 @@ class _FriendButtonState extends State<FriendButton> {
       'message': '$currentUsername followed you',
       'userId': currentUser.uid,
     };
+
     await FirebaseFirestore.instance
         .collection('Users')
         .doc(widget.userId)
@@ -111,14 +123,11 @@ class _FriendButtonState extends State<FriendButton> {
       return;
     }
 
-    final userDoc =
-        FirebaseFirestore.instance.collection('Users').doc(currentUser.uid);
-    final friendDoc = userDoc.collection('Friends').doc(widget.userId);
+    final userDoc = FirebaseFirestore.instance.collection('Users').doc(currentUser.uid);
+    final friendDoc = userDoc.collection('Supportings').doc(widget.userId);
 
-    final friendUserDoc =
-        FirebaseFirestore.instance.collection('Users').doc(widget.userId);
-    final currentUserFriendDoc =
-        friendUserDoc.collection('Friends').doc(currentUser.uid);
+    final friendUserDoc = FirebaseFirestore.instance.collection('Users').doc(widget.userId);
+    final currentUserFriendDoc = friendUserDoc.collection('Friends').doc(currentUser.uid);
 
     try {
       await FirebaseFirestore.instance.runTransaction((transaction) async {
@@ -128,8 +137,10 @@ class _FriendButtonState extends State<FriendButton> {
     } catch (e) {
       print('Error removing friend: $e');
     }
+
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('friendStatus_${widget.userId}', false);
+
     setState(() {
       isFriend = false;
     });
@@ -152,15 +163,15 @@ class _FriendButtonState extends State<FriendButton> {
           backgroundColor: MaterialStateProperty.all<Color>(
               isFriend ? Colors.red : Colors.blue),
           shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-            const RoundedRectangleBorder(
-              borderRadius: BorderRadius.zero,
-              side: BorderSide(color: Color.fromARGB(255, 0, 0, 0)),
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
+              side: BorderSide(color: Colors.black),
             ),
           ),
         ),
         child: Text(
           isFriend ? 'Following' : 'Follow',
-          style: const TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
+          style: TextStyle(color: Colors.white),
         ),
       ),
     );

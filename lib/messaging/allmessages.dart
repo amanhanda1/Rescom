@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:resapp/components/Profile_photo.dart';
 import 'package:resapp/components/custom_nav_bar.dart';
 import 'package:resapp/messaging/chatroom.dart';
@@ -55,13 +56,19 @@ class _allMessagesState extends State<allMessages> {
     final currentUser = FirebaseAuth.instance.currentUser;
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 26, 24, 46),
-      appBar: AppBar( 
+      appBar: AppBar(
         backgroundColor: const Color.fromARGB(128, 0, 128, 1),
-        leading: const Icon(Icons.message_outlined,color: Color.fromARGB(255, 255, 240, 223)),
+        leading: const Icon(Icons.message_outlined,
+            color: Color.fromARGB(255, 255, 240, 223)),
         title: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [Text("C H A T S",style: TextStyle(color: Color.fromARGB(255, 255, 240, 223)),)],
-        ), 
+          children: [
+            Text(
+              "C H A T S",
+              style: TextStyle(color: Color.fromARGB(255, 255, 240, 223)),
+            )
+          ],
+        ),
       ),
       body: Column(
         children: [
@@ -71,6 +78,7 @@ class _allMessagesState extends State<allMessages> {
                   .collection('Users')
                   .doc(widget.userId)
                   .collection('Conversations')
+                  .orderBy('timestamp', descending: true)
                   .snapshots(),
               builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -150,6 +158,8 @@ class _allMessagesState extends State<allMessages> {
                                     false;
                             bool showNewMessageIndicator = hasNewMessage &&
                                 !isMessageSeen; // Updated condition
+                            final time =
+                                messageSnapshot.data!.docs.first['timestamp'];
                             return Container(
                               margin: const EdgeInsets.symmetric(vertical: 8.0),
                               child: ListTile(
@@ -164,10 +174,10 @@ class _allMessagesState extends State<allMessages> {
                                 title: Text(
                                   otherUserName,
                                   style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                    color:Color.fromARGB(255, 255, 240, 223)
-                                  ),
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      color:
+                                          Color.fromARGB(255, 255, 240, 223)),
                                 ),
                                 subtitle: Text(
                                   lastMessage,
@@ -178,12 +188,27 @@ class _allMessagesState extends State<allMessages> {
                                         : null,
                                   ),
                                 ),
-                                trailing: hasNewMessage && !isMessageSeen
-                                    ? const CircleAvatar(
+                                trailing: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    if (hasNewMessage && !isMessageSeen)
+                                      CircleAvatar(
                                         backgroundColor: Colors.orange,
                                         radius: 8.0,
-                                      )
-                                    : null,
+                                      ),
+                                    if (hasNewMessage && !isMessageSeen)
+                                      SizedBox(
+                                          height:
+                                              4), // Adjust as needed for spacing
+                                    Text(
+                                      time != null
+                                          ? DateFormat('HH:mm').format(time
+                                              .toDate()) // Convert timestamp to DateTime and format
+                                          : '',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ],
+                                ),
                                 onTap: () {
                                   Navigator.push(
                                     context,

@@ -124,7 +124,7 @@ class _UsersPageState extends State<UsersPage> {
                         color: cardColor,
                         child: ListTile(
                           leading: CircleAvatar(
-                            radius: 28,
+                            radius: 24,
                             backgroundColor: Colors.grey.shade300,
                             child: ProfilePhotoWidget(
                               photoUrl: photoUrl,

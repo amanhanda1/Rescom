@@ -373,11 +373,17 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   // Function to launch URL using url_launcher
-  void _launchURL(String url) async {
-    if (await canLaunchUrl(Uri.parse(url))) {
-      await launchUrl(Uri.parse(url));
+  Future<void> _launchURL(String url) async {
+  if (await canLaunchUrl(Uri.parse(url))) {
+    final uri = Uri.parse(url);
+    if (!uri.hasScheme) {
+      final uriWithScheme = Uri.parse('https://$url');
+      await launchUrl(uriWithScheme);
     } else {
-      throw 'Could not launch $url';
+      await launchUrl(uri);
     }
+  } else {
+    throw 'Could not launch $url';
   }
+}
 }

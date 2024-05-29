@@ -25,17 +25,18 @@ class _NotificationPageState extends State<NotificationPage> {
         ),
       );
     }
+
     Future<void> _refreshHome(BuildContext context) async {
       User? currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser != null) {
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) => NotificationPage(userId: currentUser.uid),
           ),
         );
       }
-      
+
       await Future.delayed(Duration(seconds: 2));
     }
 
@@ -60,7 +61,7 @@ class _NotificationPageState extends State<NotificationPage> {
         ),
       ),
       body: RefreshIndicator(
-        onRefresh: ()=>_refreshHome(context),
+        onRefresh: () => _refreshHome(context),
         child: FutureBuilder(
           future: getNotifications(),
           builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -116,6 +117,7 @@ class _NotificationPageState extends State<NotificationPage> {
           .collection('Users')
           .doc(user.uid) // Using user's UID instead of widget.userId
           .collection('Notifications')
+          .orderBy('timestamp', descending: true) // Add this line
           .get();
     } else {
       // Handle the case where the user is not logged in
