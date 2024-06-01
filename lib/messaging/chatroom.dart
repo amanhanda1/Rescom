@@ -24,6 +24,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   bool _isHovering = false;
   bool _canSendMessage = true;
   final MessagingService _messagingService = MessagingService();
+  bool _isFetchingData = false;
 
   @override
   void initState() {
@@ -32,28 +33,51 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     _checkMessagePermission();
   }
 
-  Future<void> _fetchReceiverUsername() async {
-    final DocumentSnapshot receiverSnapshot = await FirebaseFirestore.instance
-        .collection('Users')
-        .doc(widget.receiverUserId)
-        .get();
+  @override
+  void dispose() {
+    _isFetchingData = false;
+    _messageController.dispose();
+    super.dispose();
+  }
 
-    if (receiverSnapshot.exists) {
-      setState(() {
-        _receiverUsername = receiverSnapshot['username'];
-      });
+  Future<void> _fetchReceiverUsername() async {
+    try {
+      final DocumentSnapshot receiverSnapshot = await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(widget.receiverUserId)
+          .get();
+
+      if (receiverSnapshot.exists && mounted) {
+        setState(() {
+          _receiverUsername = receiverSnapshot['username'];
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        print('Error fetching receiver username: $e');
+      }
     }
   }
 
   Future<void> _checkMessagePermission() async {
+    if (_isFetchingData) return;
+    _isFetchingData = true;
+
     try {
       bool canSendMessage = await _messagingService.canSendMessage(
           widget.senderUserId, widget.receiverUserId);
-      setState(() {
-        _canSendMessage = canSendMessage;
-      });
+
+      if (mounted) {
+        setState(() {
+          _canSendMessage = canSendMessage;
+        });
+      }
     } catch (e) {
-      print('Error checking message permission: $e');
+      if (mounted) {
+        print('Error checking message permission: $e');
+      }
+    } finally {
+      _isFetchingData = false;
     }
   }
 
@@ -92,22 +116,22 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                   color: _isHovering
                       ? Colors.orange
                       : Color.fromARGB(0, 250, 248, 248),
-                  borderRadius:
-                      BorderRadius.circular(8.0), // adjust the radius as needed
+                  borderRadius: BorderRadius.circular(8.0),
                 ),
                 child: ElevatedButton(
                   onPressed: navigateToEventPage,
                   onHover: (isHovering) {
-                    setState(() {
-                      _isHovering = isHovering;
-                    });
+                    if (mounted) {
+                      setState(() {
+                        _isHovering = isHovering;
+                      });
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _isHovering
                         ? Colors.orange
-                        : Color.fromARGB(0, 250, 248,
-                            248), // set the button background to transparent
-                    elevation: 0, // Remove elevation
+                        : Color.fromARGB(0, 250, 248, 248),
+                    elevation: 0,
                   ),
                   child: Text(
                     _receiverUsername.toUpperCase() + ' >',
@@ -187,7 +211,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        if (showDate) // Show date if it's the first message of the day or a new day
+                        if (showDate)
                           Padding(
                             padding: const EdgeInsets.all(8),
                             child: Center(
@@ -229,8 +253,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                   padding:
                                       const EdgeInsets.only(top: 4, right: 8),
                                   child: Text(
-                                    DateFormat('HH:mm')
-                                        .format(messageDate),
+                                    DateFormat('HH:mm').format(messageDate),
                                     style: TextStyle(
                                       color: Colors.white.withOpacity(0.6),
                                       fontSize: 12,
@@ -282,15 +305,17 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                 message: message,
                               );
                               _messageController.clear();
-                              _checkMessagePermission(); // Recheck permission after sending message
+                              _checkMessagePermission();
                             } catch (e) {
-                              print('Error: $e');
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                      'Error: You can\'t send more than one message until you are followed.'),
-                                ),
-                              );
+                              if (mounted) {
+                                print('Error: $e');
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                        'Error: You can\'t send more than one message until you are followed.'),
+                                  ),
+                                );
+                              }
                             }
                           }
                         }

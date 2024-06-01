@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart'; // Import for kIsWeb
 import 'package:flutter/material.dart';
 import 'package:resapp/components/error.dart';
 import 'package:resapp/components/mytextfield.dart';
@@ -24,6 +25,7 @@ class _RegisterPageState extends State<RegisterPage> {
   DateTime? selectedDate;
   String? selectedUniversity;
   String? selectedRole;
+  
   Future<void> selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -33,10 +35,8 @@ class _RegisterPageState extends State<RegisterPage> {
       builder: (BuildContext context, Widget? child) {
         return Theme(
           data: ThemeData.light().copyWith(
-            primaryColor:
-                const Color.fromARGB(128, 0, 128, 1), // Set the primary color
-            colorScheme:
-                ColorScheme.light(primary: Color.fromARGB(206, 49, 50, 50)),
+            primaryColor: const Color.fromARGB(128, 0, 128, 1), // Set the primary color
+            colorScheme: ColorScheme.light(primary: Color.fromARGB(206, 49, 50, 50)),
             buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary),
           ),
           child: child!,
@@ -56,7 +56,7 @@ class _RegisterPageState extends State<RegisterPage> {
     });
   }
 
-  void resisterUser() async {
+  void registerUser() async {
     // Loading circle
     showDialog(
       context: context,
@@ -70,7 +70,7 @@ class _RegisterPageState extends State<RegisterPage> {
       showDialog(
         context: context,
         builder: (context) =>
-            CustomErrorDialog(message: "password doesn't match"),
+            CustomErrorDialog(message: "Password doesn't match"),
       );
     }
     // Creating the user
@@ -124,7 +124,7 @@ class _RegisterPageState extends State<RegisterPage> {
         'researchGateUrl': '',
         'Gender': '',
         'role': role,
-        'university': university,
+        'university': university ?? '',
         'lastseen': FieldValue.serverTimestamp(),
         'firstName': firstNameController.text,
         'lastName': lastNameController.text,
@@ -177,7 +177,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               const SizedBox(height: 10),
               MyTextField(
-                hintText: "abc@gmail.com",
+                hintText: "abc@gmail.com(preferred official)",
                 obscureText: false,
                 controller: emailController,
               ),
@@ -189,7 +189,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               const SizedBox(height: 8),
               MyTextField(
-                hintText: "confirm password",
+                hintText: "Confirm password",
                 obscureText: true,
                 controller: cpasswordController,
               ),
@@ -213,7 +213,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     style:
                         const TextStyle(color: Color.fromARGB(255, 26, 24, 46)),
                     dropdownColor: Color.fromARGB(255, 26, 24, 46),
-                    items: <String>['Student', 'Teacher','Job','researcher'] // Dropdown items
+                    items: <String>['Student', 'Teacher','Job','Researcher'] // Dropdown items
                         .map<DropdownMenuItem<String>>((String value) {
                       return DropdownMenuItem<String>(
                         value: value,
@@ -253,33 +253,34 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(
                     width: 16,
                   ),
-                  ElevatedButton(
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all<Color>(
-                          Color.fromARGB(255, 255, 240, 223)),
+                  if (!kIsWeb) // Check if not running on web
+                    ElevatedButton(
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all<Color>(
+                            Color.fromARGB(255, 255, 240, 223)),
+                      ),
+                      onPressed: () async {
+                        // Navigate to university list and get the selected university
+                        String? selectedUniversity = await Navigator.push<String>(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => UniversityListScreen(),
+                          ),
+                        );
+                        setUniversity(selectedUniversity!);
+                      },
+                      child: const Text("SELECT YOUR UNIVERSITY",
+                          style: TextStyle(
+                            color: Color.fromARGB(249, 5, 1, 9),
+                          )),
                     ),
-                    onPressed: () async {
-                      // Navigate to university list and get the selected university
-                      String? selectedUniversity = await Navigator.push<String>(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => UniversityListScreen(),
-                        ),
-                      );
-                      setUniversity(selectedUniversity!);
-                    },
-                    child: const Text("SELECT YOUR UNIVERSITY",
-                        style: TextStyle(
-                          color: Color.fromARGB(249, 5, 1, 9),
-                        )),
-                  ),
                 ],
               ),
               const SizedBox(
                 height: 12,
               ),
               ElevatedButton(
-                onPressed: resisterUser,
+                onPressed: registerUser,
                 style: ButtonStyle(
                   backgroundColor: MaterialStateProperty.all<Color>(
                       Color.fromARGB(255, 255, 240, 223)),
@@ -297,7 +298,7 @@ class _RegisterPageState extends State<RegisterPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("Already have an account? ",style: TextStyle(color:const Color.fromARGB(255, 255, 240, 223))),
+                  const Text("Already have an account? ", style: TextStyle(color: Color.fromARGB(255, 255, 240, 223))),
                   GestureDetector(
                     onTap: () {
                       // Navigate to the login page

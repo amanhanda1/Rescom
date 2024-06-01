@@ -44,7 +44,7 @@ class _UsersPageState extends State<UsersPage> {
       backgroundColor: const Color.fromARGB(255, 26, 24, 46),
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(128, 0, 128, 1),
-        title: const Text('Users with Similar Topics'),
+        title: const Text('Users with Similar Topics',style: TextStyle(color:Color.fromARGB(255, 255, 240, 223)),),
       ),
       body: StreamBuilder<List<String>>(
         stream: _selectedTopicsStream,

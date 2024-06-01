@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:resapp/components/Profile_photo.dart';
 import 'package:resapp/components/research_topics.dart';
 import 'package:resapp/pages/Profile_page.dart';
+import 'package:rxdart/rxdart.dart';
 
 class UserList extends StatefulWidget {
   final String role;
@@ -36,6 +37,32 @@ class _UserListState extends State<UserList> {
     }
   }
 
+  Stream<List<DocumentSnapshot>> _getUserStream() {
+    final query = FirebaseFirestore.instance.collection('Users').where('role', isEqualTo: widget.role);
+
+    if (widget.searchQuery.isEmpty) {
+      return query.snapshots().map((snapshot) => snapshot.docs);
+    } else {
+      final usernameQuery = query
+          .where('username', isGreaterThanOrEqualTo: widget.searchQuery)
+          .where('username', isLessThan: widget.searchQuery + 'z');
+      final universityQuery = query
+          .where('university', isGreaterThanOrEqualTo: widget.searchQuery)
+          .where('university', isLessThan: widget.searchQuery + 'z');
+
+      return Rx.combineLatest2(
+        usernameQuery.snapshots().map((snapshot) => snapshot.docs),
+        universityQuery.snapshots().map((snapshot) => snapshot.docs),
+        (List<DocumentSnapshot> usernameDocs, List<DocumentSnapshot> universityDocs) {
+          final combinedDocs = <DocumentSnapshot>{};
+          combinedDocs.addAll(usernameDocs);
+          combinedDocs.addAll(universityDocs);
+          return combinedDocs.toList();
+        },
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     void navigateToProfilePage(String userId) {
@@ -65,28 +92,10 @@ class _UserListState extends State<UserList> {
             style: TextStyle(color: Color.fromARGB(255, 255, 240, 223)),
           ),
         ),
-        // actions: [
-        //   IconButton(
-        //     icon: Icon(Icons.filter_list),
-        //     onPressed: () {
-        //       _showFilterDialog(context);
-        //     },
-        //   ),
-        // ],
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: widget.searchQuery.isEmpty
-            ? FirebaseFirestore.instance
-                .collection('Users')
-                .where('role', isEqualTo: widget.role)
-                .snapshots()
-            : FirebaseFirestore.instance
-                .collection('Users')
-                .where('role', isEqualTo: widget.role)
-                .where('username', isGreaterThanOrEqualTo: widget.searchQuery)
-                .where('username', isLessThan: widget.searchQuery + 'z')
-                .snapshots(),
-        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+      body: StreamBuilder<List<DocumentSnapshot>>(
+        stream: _getUserStream(),
+        builder: (BuildContext context, AsyncSnapshot<List<DocumentSnapshot>> snapshot) {
           if (snapshot.hasError) {
             print(snapshot.error);
             return Center(
@@ -100,16 +109,7 @@ class _UserListState extends State<UserList> {
             return Center(child: CircularProgressIndicator());
           }
 
-          if (!snapshot.hasData) {
-            return Center(
-              child: Text(
-                'No users found',
-                style: TextStyle(color: Colors.white),
-              ),
-            );
-          }
-
-          if (snapshot.data!.docs.isEmpty) {
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(
               child: Text(
                 'No users found',
@@ -119,10 +119,10 @@ class _UserListState extends State<UserList> {
           }
 
           return ListView.builder(
-            itemCount: snapshot.data!.docs.length,
+            itemCount: snapshot.data!.length,
             itemBuilder: (BuildContext context, int index) {
               Map<String, dynamic> data =
-                  snapshot.data!.docs[index].data() as Map<String, dynamic>;
+                  snapshot.data![index].data() as Map<String, dynamic>;
               final lastSeen = data['lastseen'];
               final isOnline = _checkOnlineStatus(lastSeen);
               final cardColor = isOnline
@@ -137,10 +137,9 @@ class _UserListState extends State<UserList> {
                           orElse: () => ResearchTopic(id: id, title: id))
                       .title)
                   .join(', ');
-                  String? photoUrl = data.containsKey('photoUrl')
-                            ? data['photoUrl']
-                            : null;
-                  final otherUserId=data['uid'];
+              String? photoUrl =
+                  data.containsKey('photoUrl') ? data['photoUrl'] : null;
+              final otherUserId = data['uid'];
               if (FirebaseAuth.instance.currentUser != null &&
                   data['uid'] == FirebaseAuth.instance.currentUser!.uid) {
                 return SizedBox.shrink(); // Skip this user
@@ -153,13 +152,13 @@ class _UserListState extends State<UserList> {
                   color: cardColor,
                   child: ListTile(
                     leading: CircleAvatar(
-                                  radius: 24,
-                                  backgroundColor: Colors.grey.shade300,
-                                  child: ProfilePhotoWidget(
-                                    photoUrl: photoUrl,
-                                    userId: otherUserId,
-                                  ),
-                                ),
+                      radius: 24,
+                      backgroundColor: Colors.grey.shade300,
+                      child: ProfilePhotoWidget(
+                        photoUrl: photoUrl,
+                        userId: otherUserId,
+                      ),
+                    ),
                     trailing: Container(
                       width: 10,
                       height: 10,
@@ -176,11 +175,16 @@ class _UserListState extends State<UserList> {
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(data['university'] ?? data['role'],
-                            style: isOnline
-                                ? TextStyle(
-                                    color: Color.fromARGB(151, 26, 24, 46))
-                                : TextStyle(color: Colors.white60)),
+                        Text(
+                          (data['university']?.isNotEmpty == true
+                                  ? data['university']
+                                  : data['role']) ??
+                              '',
+                          style: isOnline
+                              ? TextStyle(
+                                  color: Color.fromARGB(151, 26, 24, 46))
+                              : TextStyle(color: Colors.white60),
+                        ),
                         if (selectedTopics.isNotEmpty)
                           Text('Research Topics: $topicTitles',
                               style: isOnline
@@ -199,40 +203,3 @@ class _UserListState extends State<UserList> {
     );
   }
 }
-//   void _showFilterDialog(BuildContext context) {
-//   showDialog(
-//     context: context,
-//     builder: (BuildContext context) {
-//       return AlertDialog(
-//         title: Text('Filter by University'),
-//         content: TextField(
-//           onChanged: (value) {
-//             setState(() {
-//               _searchUniversity = value.trim();
-//             });
-//           },
-//           decoration: InputDecoration(
-//             hintText: 'Enter University Name',
-//           ),
-//         ),
-//         actions: <Widget>[
-//           TextButton(
-//             child: Text('Clear'),
-//             onPressed: () {
-//               setState(() {
-//                 _searchUniversity = null;
-//               });
-//               Navigator.of(context).pop();
-//             },
-//           ),
-//           TextButton(
-//             child: Text('Apply'),
-//             onPressed: () {
-//               Navigator.of(context).pop();
-//             },
-//           ),
-//         ],
-//       );
-//     },
-//   );
-// }

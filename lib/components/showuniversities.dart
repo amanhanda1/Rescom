@@ -17,6 +17,7 @@ class UniversityListScreen extends StatefulWidget {
 class UniversityListScreenState extends State<UniversityListScreen> {
   String searchText = '';
   List<dynamic> universities = [];
+  bool _isFetchingData = false; // Flag to indicate if data is being fetched
 
   @override
   void initState() {
@@ -24,12 +25,17 @@ class UniversityListScreenState extends State<UniversityListScreen> {
     fetchData();
   }
 
-  Future<void> saveUniversityToFirestore(
-      User? user, String universityName) async {
+  @override
+  void dispose() {
+    _isFetchingData = false; // Stop fetching data when the widget is disposed
+    super.dispose();
+  }
+
+  Future<void> saveUniversityToFirestore(User? user, String universityName) async {
     if (user != null && user.email != null) {
       await FirebaseFirestore.instance
           .collection("Users")
-          .doc(user.uid) // Assuming 'email' is the user identifier
+          .doc(user.uid)
           .set({
         'university': universityName,
       }, SetOptions(merge: true));
@@ -38,27 +44,41 @@ class UniversityListScreenState extends State<UniversityListScreen> {
   }
 
   Future<void> fetchData() async {
-    final response = await http.get(
-      Uri.parse('http://universities.hipolabs.com/search?name=$searchText'),
-    );
+    if (!_isFetchingData) {
+      _isFetchingData = true;
+      try {
+        final response = await http.get(
+          Uri.parse('http://universities.hipolabs.com/search?name=$searchText'),
+        );
 
-    if (response.statusCode == 200) {
-      final List<dynamic> apiUniversities = json.decode(response.body);
-      final customUniversities = CustomUniversities.getUniversities();
+        if (response.statusCode == 200) {
+          final List<dynamic> apiUniversities = json.decode(response.body);
+          final customUniversities = CustomUniversities.getUniversities();
 
-      // Commenting this line as it's not clear where 'CustomUniversities' is defined.
-      // final customUniversities = CustomUniversities.getUniversities();
-
-      setState(() {
-        universities = [...apiUniversities,...customUniversities];
-      });
-    } else {
-      throw Exception('Failed to load universities');
+          if (mounted) {
+            setState(() {
+              universities = [...apiUniversities, ...customUniversities];
+            });
+          }
+        } else {
+          throw Exception('Failed to load universities');
+        }
+      } catch (e) {
+        print('Error fetching data: $e');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error fetching data: $e'),
+            ),
+          );
+        }
+      } finally {
+        _isFetchingData = false;
+      }
     }
   }
 
   List<dynamic> getFilteredUniversities() {
-    // Filter universities based on the search text
     return universities
         .where((university) => university['name']
             .toString()
@@ -74,18 +94,19 @@ class UniversityListScreenState extends State<UniversityListScreen> {
     if (universities.isEmpty) {
       return const Scaffold(
         backgroundColor: Color.fromARGB(206, 41, 152, 128),
-        body:Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              "Loading the universities",
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            CircularProgressIndicator(),
-          ],
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                "Loading the universities",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              CircularProgressIndicator(),
+            ],
+          ),
         ),
-      ));
+      );
     }
 
     List<dynamic> filteredUniversities = getFilteredUniversities();
@@ -115,15 +136,14 @@ class UniversityListScreenState extends State<UniversityListScreen> {
                 },
                 decoration: const InputDecoration(
                   labelText: 'Search University',
-                  prefixIcon: Icon(Icons.search,color: Color.fromARGB(255, 255, 240, 223),),
+                  prefixIcon: Icon(Icons.search, color: Color.fromARGB(255, 255, 240, 223)),
                   labelStyle: TextStyle(color: Color.fromARGB(255, 255, 240, 223)),
                 ),
                 style: TextStyle(color: Color.fromARGB(255, 255, 240, 223)),
               ),
             ),
-
             Expanded(
-              child:     filteredUniversities.isEmpty
+              child: filteredUniversities.isEmpty
                   ? const Center(
                       child: Text(
                         "No universities found",
@@ -137,12 +157,9 @@ class UniversityListScreenState extends State<UniversityListScreen> {
                           color: Color.fromARGB(125, 236, 239, 238),
                           child: ListTile(
                             title: Text(filteredUniversities[index]['name']!),
-                            subtitle:
-                                Text(filteredUniversities[index]['country']!),
+                            subtitle: Text(filteredUniversities[index]['country']!),
                             onTap: () async {
-                              // Pass the selected university back to the previous screen
-                              Navigator.pop(
-                                  context, filteredUniversities[index]['name']);
+                              Navigator.pop(context, filteredUniversities[index]['name']);
                             },
                           ),
                         );

@@ -19,6 +19,41 @@ class allMessages extends StatefulWidget {
 }
 
 class _allMessagesState extends State<allMessages> {
+  final _navigationBarKey = GlobalKey<cNavigationBarState>();
+  final currentUser = FirebaseAuth.instance.currentUser;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Listen to the Firestore stream for new messages
+    FirebaseFirestore.instance
+        .collection('Users')
+        .doc(widget.userId)
+        .collection('Conversations')
+        .orderBy('timestamp', descending: true)
+        .snapshots()
+        .listen((snapshot) async {
+      // Check if there are any new messages
+      final hasNewMessage = await Future.wait(snapshot.docs.map((doc) async {
+        final conversationId = doc['conversationId'];
+
+        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+            .collection('Conversations')
+            .doc(conversationId)
+            .collection('Messages')
+            .where('senderUserId', isNotEqualTo: currentUser!.uid)
+            .where('seen', isEqualTo: false)
+            .get();
+
+        return querySnapshot.docs.isNotEmpty;
+      })).then((results) => results.contains(true));
+
+      // Update the navigation bar with the new message status
+      _navigationBarKey.currentState?.setNewMessageStatus(hasNewMessage);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     void navigateToHomePage() {
@@ -44,16 +79,6 @@ class _allMessagesState extends State<allMessages> {
       );
     }
 
-    void navigateToChatPage(String userId) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => allMessages(userId: userId),
-        ),
-      );
-    }
-
-    final currentUser = FirebaseAuth.instance.currentUser;
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 26, 24, 46),
       appBar: AppBar(
@@ -94,11 +119,11 @@ class _allMessagesState extends State<allMessages> {
                     style: TextStyle(color: Color.fromARGB(255, 255, 240, 223)),
                   ));
                 }
+                final docs = snapshot.data!.docs;
                 return ListView.builder(
-                  reverse: true, // Display items in reverse order
-                  itemCount: snapshot.data!.docs.length,
+                  itemCount: docs.length,
                   itemBuilder: (context, index) {
-                    final doc = snapshot.data!.docs[index];
+                    final doc = docs[index];
                     String conversationId = doc['conversationId'];
                     String senderId = doc['senderUserId'];
                     String receiverId = doc['receiverUserId'];
@@ -118,15 +143,14 @@ class _allMessagesState extends State<allMessages> {
                         if (userSnapshot.hasError) {
                           return Text('Error: ${userSnapshot.error}');
                         }
-                        if (!userSnapshot.hasData) {
+                        if (!userSnapshot.hasData ||
+                            userSnapshot.data == null) {
                           return Container(); // Placeholder for empty user data
                         }
                         String otherUserName = userSnapshot.data!['username'];
                         Map<String, dynamic>? userData =
                             userSnapshot.data!.data() as Map<String, dynamic>?;
-                        String? photoUrl = userData!.containsKey('photoUrl')
-                            ? userData['photoUrl']
-                            : null;
+                        String? photoUrl = userData?['photoUrl'];
                         return StreamBuilder(
                           stream: FirebaseFirestore.instance
                               .collection('Conversations')
@@ -152,14 +176,24 @@ class _allMessagesState extends State<allMessages> {
                                 messageSnapshot.data!.docs.first['message'];
                             bool hasNewMessage = messageSnapshot
                                     .data!.docs.first['senderUserId'] !=
-                                currentUser.uid;
+                                currentUser!.uid;
                             bool isMessageSeen =
                                 messageSnapshot.data!.docs.first['seen'] ??
                                     false;
                             bool showNewMessageIndicator = hasNewMessage &&
                                 !isMessageSeen; // Updated condition
-                            final time =
+                            final timestamp =
                                 messageSnapshot.data!.docs.first['timestamp'];
+
+                            DateTime messageTime = timestamp.toDate();
+                            DateTime now = DateTime.now();
+                            bool isToday = now.year == messageTime.year &&
+                                now.month == messageTime.month &&
+                                now.day == messageTime.day;
+                            String displayTime = isToday
+                                ? DateFormat('HH:mm').format(messageTime)
+                                : '${now.difference(messageTime).inDays} days ago';
+
                             return Container(
                               margin: const EdgeInsets.symmetric(vertical: 8.0),
                               child: ListTile(
@@ -201,10 +235,7 @@ class _allMessagesState extends State<allMessages> {
                                           height:
                                               4), // Adjust as needed for spacing
                                     Text(
-                                      time != null
-                                          ? DateFormat('HH:mm').format(time
-                                              .toDate()) // Convert timestamp to DateTime and format
-                                          : '',
+                                      displayTime,
                                       style: TextStyle(color: Colors.white),
                                     ),
                                   ],
@@ -214,7 +245,7 @@ class _allMessagesState extends State<allMessages> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => ChatRoomPage(
-                                          senderUserId: currentUser.uid,
+                                          senderUserId: currentUser!.uid,
                                           receiverUserId: otherUserId),
                                     ),
                                   );
@@ -242,8 +273,9 @@ class _allMessagesState extends State<allMessages> {
         ],
       ),
       bottomNavigationBar: cNavigationBar(
+        key: _navigationBarKey,
         onHomePressed: navigateToHomePage,
-        onChatPressed: () => {},
+        onChatPressed: () {},
         onProfileIconPressed: () =>
             navigateToProfilePage(FirebaseAuth.instance.currentUser!.uid),
         onAdduserPressed: navigateToAddUser,

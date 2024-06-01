@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +19,28 @@ class AddUser extends StatefulWidget {
 class _AddUserState extends State<AddUser> {
   String _selectedRole = 'Student';
   String _searchQuery = '';
+  String? _university;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUniversity();
+  }
+
+  Future<void> _fetchUniversity() async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      final docSnapshot = await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(currentUser.uid)
+          .get();
+      if (docSnapshot.exists) {
+        setState(() {
+          _university = docSnapshot.data()?['university'];
+        });
+      }
+    }
+  }
 
   void _handleSearch(String query) {
     setState(() {
@@ -103,7 +124,7 @@ class _AddUserState extends State<AddUser> {
                   onChanged: _handleSearch,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    hintText: 'Search users...',
+                    hintText: 'Search user or university',
                     hintStyle: TextStyle(color: Colors.white60),
                     border: InputBorder.none,
                   ),
@@ -132,7 +153,6 @@ class _AddUserState extends State<AddUser> {
           ],
         ),
         actions: [
-          // Add PopupMenuButton
           PopupMenuButton<String>(
             onSelected: (value) {
               if (value == 'Users for you') {
@@ -150,13 +170,14 @@ class _AddUserState extends State<AddUser> {
                   title: Text('Users for you'),
                 ),
               ),
-              const PopupMenuItem<String>(
-                value: 'Users from same university',
-                child: ListTile(
-                  leading: Icon(Icons.school_rounded),
-                  title: Text('Users from same university'),
+              if (_university != null && _university!.isNotEmpty)
+                const PopupMenuItem<String>(
+                  value: 'Users from same university',
+                  child: ListTile(
+                    leading: Icon(Icons.school_rounded),
+                    title: Text('Users from same university'),
+                  ),
                 ),
-              ),
             ],
           ),
         ],

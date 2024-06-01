@@ -11,6 +11,28 @@ class ResearchTopicSelection extends StatefulWidget {
 
 class _ResearchTopicSelectionState extends State<ResearchTopicSelection> {
   List<ResearchTopic> selectedTopics = [];
+  Future<List<String>> getSelectedTopicsFromFirestore() async {
+  String uid = FirebaseAuth.instance.currentUser!.uid;
+  DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('Users').doc(uid).get();
+  List<String> selectedTopicIds = List<String>.from(userDoc.get('selectedTopics') ?? []);
+  return selectedTopicIds;
+}
+@override
+void initState() {
+  super.initState();
+  _loadSelectedTopics();
+}
+
+Future<void> _loadSelectedTopics() async {
+  List<String> selectedTopicIds = await getSelectedTopicsFromFirestore();
+  for (var topic in researchTopics) {
+    topic.isSelected = selectedTopicIds.contains(topic.id);
+    if (topic.isSelected) {
+      selectedTopics.add(topic);
+    }
+  }
+  setState(() {});
+}
 
   @override
   Widget build(BuildContext context) {

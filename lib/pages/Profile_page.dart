@@ -2,7 +2,6 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:flutter/foundation.dart' show kIsWeb; // Import kIsWeb
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:resapp/components/Profile_photo.dart';
@@ -29,7 +28,13 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  bool hasNewMessages = false;
   bool showPosts = true;
+  @override
+  void initState() {
+    super.initState();
+    
+  }
   void navigateToProfilePage(String userId) {
     Navigator.push(
       context,
@@ -38,15 +43,55 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     );
   }
-
-  void logout() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const FirstPage(),
-      ),
-    );
+  void checkForNewMessages() {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      FirebaseFirestore.instance
+          .collection('Users')
+          .doc(currentUser.uid)
+          .collection('Conversations')
+          .snapshots()
+          .listen((snapshot) {
+        bool newMessages = false;
+        for (var doc in snapshot.docs) {
+          FirebaseFirestore.instance
+              .collection('Conversations')
+              .doc(doc['conversationId'])
+              .collection('Messages')
+              .where('seen', isEqualTo: false)
+              .where('receiverUserId', isEqualTo: currentUser.uid)
+              .snapshots()
+              .listen((messageSnapshot) {
+            if (messageSnapshot.docs.isNotEmpty) {
+              newMessages = true;
+            }
+            if (newMessages != hasNewMessages) {
+              setState(() {
+                hasNewMessages = newMessages;
+              });
+            }
+          });
+        }
+      });
+    }
   }
+
+  void logout() async {
+  try {
+    // Sign out the user from Firebase Authentication
+    await FirebaseAuth.instance.signOut();
+
+    // Navigate to the FirstPage
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const FirstPage()),
+      (Route<dynamic> route) => false,
+    );
+  } catch (e) {
+    // Handle any errors that occurred during logout
+    print('Error signing out: $e');
+  }
+}
 
   void navigateToHomePage() {
     Navigator.push(
@@ -63,6 +108,9 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   void navigateToChatPage(String userId) {
+    setState(() {
+    hasNewMessages = false;
+  });
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -301,7 +349,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     FriendCountWidget(userId: widget.userId),
                     const Spacer(),
                     if (researchGateUrl.isNotEmpty)
-                      _buildResGAteButton(researchGateUrl),
+                      _buildResGateButton(researchGateUrl),
                   ],
                 ),
 
@@ -344,15 +392,16 @@ class _ProfilePageState extends State<ProfilePage> {
         },
       ),),
       bottomNavigationBar: cNavigationBar(
-        onProfileIconPressed: () =>
-            navigateToProfilePage(FirebaseAuth.instance.currentUser!.uid),
-        onHomePressed: navigateToHomePage,
-        onAdduserPressed: navigateToAddUser,
-        onChatPressed: () =>
-            navigateToChatPage(FirebaseAuth.instance.currentUser!.uid),
-      ),
-    );
-  }
+            onProfileIconPressed: () =>
+                navigateToProfilePage(FirebaseAuth.instance.currentUser!.uid),
+            onHomePressed: navigateToHomePage,
+            onAdduserPressed: navigateToAddUser,
+            onChatPressed: () =>
+                navigateToChatPage(FirebaseAuth.instance.currentUser!.uid),
+          ),);
+        }
+      
+  
 
   Widget _buildLinkedInButton(String linkedInUrl) {
     return TextButton(
@@ -363,7 +412,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildResGAteButton(String researchGateUrl) {
+  Widget _buildResGateButton(String researchGateUrl) {
     return TextButton(
       onPressed: () {
         _launchURL(researchGateUrl);
@@ -374,16 +423,20 @@ class _ProfilePageState extends State<ProfilePage> {
 
   // Function to launch URL using url_launcher
   Future<void> _launchURL(String url) async {
-  if (await canLaunchUrl(Uri.parse(url))) {
     final uri = Uri.parse(url);
     if (!uri.hasScheme) {
       final uriWithScheme = Uri.parse('https://$url');
-      await launchUrl(uriWithScheme);
+      if (await canLaunchUrl(uriWithScheme)) {
+        await launchUrl(uriWithScheme);
+      } else {
+        throw 'Could not launch $url';
+      }
     } else {
-      await launchUrl(uri);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
+      } else {
+        throw 'Could not launch $url';
+      }
     }
-  } else {
-    throw 'Could not launch $url';
   }
-}
 }
