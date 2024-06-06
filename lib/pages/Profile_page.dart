@@ -17,6 +17,7 @@ import 'package:resapp/pages/First_page.dart';
 import 'package:resapp/pages/HomePage.dart';
 import 'package:resapp/pages/add_user.dart';
 import 'package:resapp/pages/interest_page.dart';
+import 'package:resapp/pages/settings.dart';
 import 'package:url_launcher/url_launcher.dart'; // Import url_launcher package
 
 class ProfilePage extends StatefulWidget {
@@ -161,9 +162,18 @@ class _ProfilePageState extends State<ProfilePage> {
                       logout();
                     } else if (value == 'edit topics') {
                       Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => ResearchTopicSelection()));
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ResearchTopicSelection(),
+                        ),
+                      );
+                    } else if (value == 'settings') {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SettingsPage(),
+                        ),
+                      );
                     }
                   },
                   iconColor: const Color.fromARGB(255, 255, 240, 223),
@@ -181,7 +191,14 @@ class _ProfilePageState extends State<ProfilePage> {
                       value: 'edit topics',
                       child: ListTile(
                         leading: Icon(Icons.edit_document),
-                        title: Text('edit topics'),
+                        title: Text('Edit Topics'),
+                      ),
+                    ),
+                    const PopupMenuItem<String>(
+                      value: 'settings',
+                      child: ListTile(
+                        leading: Icon(Icons.settings),
+                        title: Text('Settings'),
                       ),
                     ),
                   ],

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -11,7 +12,6 @@ import 'package:resapp/pages/Profile_page.dart';
 import 'package:resapp/pages/add_post.dart';
 import 'package:resapp/pages/add_user.dart';
 import 'package:resapp/pages/notification_page.dart';
-
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -46,7 +46,25 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     _periodicTimer?.cancel();
     super.dispose();
   }
+  Future<void> requestNotificationPermission() async {
+  NotificationSettings settings = await FirebaseMessaging.instance.requestPermission(
+    alert: true,
+    announcement: false,
+    badge: true,
+    carPlay: false,
+    criticalAlert: false,
+    provisional: false,
+    sound: true,
+  );
 
+  if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+    print('User granted notification permission');
+  } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
+    print('User granted provisional notification permission');
+  } else {
+    print('User denied notification permission');
+  }
+}
   void updateLastSeen() async {
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser != null) {

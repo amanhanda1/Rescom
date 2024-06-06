@@ -7,6 +7,8 @@ import 'package:resapp/components/mytextfield.dart';
 import 'package:resapp/components/showuniversities.dart';
 import 'package:resapp/pages/interest_page.dart';
 import 'package:resapp/pages/login_page.dart';
+import 'package:resapp/pages/termsandcondition.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class RegisterPage extends StatefulWidget {
   RegisterPage({Key? key});
@@ -25,7 +27,8 @@ class _RegisterPageState extends State<RegisterPage> {
   DateTime? selectedDate;
   String? selectedUniversity;
   String? selectedRole;
-  
+  bool _acceptTerms = false;
+
   Future<void> selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -35,8 +38,10 @@ class _RegisterPageState extends State<RegisterPage> {
       builder: (BuildContext context, Widget? child) {
         return Theme(
           data: ThemeData.light().copyWith(
-            primaryColor: const Color.fromARGB(128, 0, 128, 1), // Set the primary color
-            colorScheme: ColorScheme.light(primary: Color.fromARGB(206, 49, 50, 50)),
+            primaryColor:
+                const Color.fromARGB(128, 0, 128, 1), // Set the primary color
+            colorScheme:
+                ColorScheme.light(primary: Color.fromARGB(206, 49, 50, 50)),
             buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary),
           ),
           child: child!,
@@ -56,8 +61,38 @@ class _RegisterPageState extends State<RegisterPage> {
     });
   }
 
+  Future<void> _showTermsDialog() async {
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Terms and Conditions'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(
+                    'Please accept the terms and conditions before signing up.'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void registerUser() async {
-    // Loading circle
+    if (!_acceptTerms) {
+      await _showTermsDialog();
+      return;
+    }
     showDialog(
       context: context,
       builder: (context) => const Center(
@@ -213,7 +248,12 @@ class _RegisterPageState extends State<RegisterPage> {
                     style:
                         const TextStyle(color: Color.fromARGB(255, 26, 24, 46)),
                     dropdownColor: Color.fromARGB(255, 26, 24, 46),
-                    items: <String>['Student', 'Teacher','Job','Researcher'] // Dropdown items
+                    items: <String>[
+                      'Student',
+                      'Teacher',
+                      'Job',
+                      'Researcher'
+                    ] // Dropdown items
                         .map<DropdownMenuItem<String>>((String value) {
                       return DropdownMenuItem<String>(
                         value: value,
@@ -261,7 +301,8 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       onPressed: () async {
                         // Navigate to university list and get the selected university
-                        String? selectedUniversity = await Navigator.push<String>(
+                        String? selectedUniversity =
+                            await Navigator.push<String>(
                           context,
                           MaterialPageRoute(
                             builder: (context) => UniversityListScreen(),
@@ -274,6 +315,65 @@ class _RegisterPageState extends State<RegisterPage> {
                             color: Color.fromARGB(249, 5, 1, 9),
                           )),
                     ),
+                ],
+              ),
+              const SizedBox(
+                height: 12,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Checkbox(
+                    value: _acceptTerms,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        _acceptTerms = value ?? false;
+                      });
+                    },
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  Text("I accept to ",
+                      style: const TextStyle(
+                          color: Color.fromARGB(255, 255, 240, 223))),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => TAC()),
+                      );
+                    },
+                    child: Text(
+                      "Terms and Conditions",
+                      style: TextStyle(
+                        fontStyle: FontStyle.italic,
+                        color: Colors.blue,
+                        decoration: TextDecoration.underline,
+                        decorationColor: Colors.blue,
+                      ),
+                    ),
+                  ),
+                  Text(" and ",style: const TextStyle(
+                          color: Color.fromARGB(255, 255, 240, 223))),
+                  GestureDetector(
+                    onTap: () async {
+                      const url =
+                          'https://www.termsfeed.com/live/fe128def-6789-425b-b946-f978b8f2879d';
+                      if (await canLaunchUrl(Uri.parse(url))) {
+                        await launchUrl(Uri.parse(url));
+                      } else {
+                        throw 'Could not launch $url';
+                      }
+                    },
+                    child: Text(
+                      "privacy policy",
+                      style: TextStyle(
+                        fontStyle: FontStyle.italic,
+                        color: Colors.blue,
+                        decoration: TextDecoration.underline,
+                        decorationColor: Colors.blue,
+                      ),
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(
@@ -298,7 +398,9 @@ class _RegisterPageState extends State<RegisterPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("Already have an account? ", style: TextStyle(color: Color.fromARGB(255, 255, 240, 223))),
+                  const Text("Already have an account? ",
+                      style:
+                          TextStyle(color: Color.fromARGB(255, 255, 240, 223))),
                   GestureDetector(
                     onTap: () {
                       // Navigate to the login page

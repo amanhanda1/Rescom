@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class ProfilePhotoWidget extends StatefulWidget {
   final String? photoUrl;
@@ -22,9 +23,21 @@ class _ProfilePhotoWidgetState extends State<ProfilePhotoWidget> {
   File? _imageFile;
 
   Future<void> _pickImage() async {
+    PermissionStatus photoPermissionStatus;
+
+    if (Platform.isAndroid && await Permission.photosAddOnly.isPermanentlyDenied) {
+      openAppSettings();
+    } else {
+      photoPermissionStatus = await Permission.photos.request();
+
+      if (!photoPermissionStatus.isGranted) {
+        _showPermissionDeniedDialog();
+        return;
+      }
+    }
+
     if (Platform.isAndroid || Platform.isIOS) {
-      final pickedFile =
-          await ImagePicker().pickImage(source: ImageSource.gallery);
+      final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
 
       if (pickedFile != null) {
         setState(() {
@@ -42,7 +55,48 @@ class _ProfilePhotoWidgetState extends State<ProfilePhotoWidget> {
     }
   }
 
+  void _showPermissionDeniedDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Permission Denied"),
+          content: Text(
+              "Storage permission is required to pick images. Please grant permission in app settings."),
+          actions: <Widget>[
+            TextButton(
+              child: Text("Open Settings"),
+              onPressed: () {
+                openAppSettings();
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text("Cancel"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _uploadImage() async {
+    PermissionStatus photoPermissionStatus;
+
+    if (Platform.isAndroid && await Permission.photosAddOnly.isPermanentlyDenied) {
+      openAppSettings();
+    } else {
+      photoPermissionStatus = await Permission.photos.request();
+
+      if (!photoPermissionStatus.isGranted) {
+        _showPermissionDeniedDialog();
+        return;
+      }
+    }
+
     if (_imageFile != null) {
       try {
         final storageRef = FirebaseStorage.instance
@@ -56,7 +110,7 @@ class _ProfilePhotoWidgetState extends State<ProfilePhotoWidget> {
             .collection("Users")
             .doc(FirebaseAuth.instance.currentUser!.uid)
             .update({'photoUrl': downloadUrl});
-            } catch (e) {
+      } catch (e) {
         print('Error uploading image: $e');
       }
     }
@@ -74,7 +128,7 @@ class _ProfilePhotoWidgetState extends State<ProfilePhotoWidget> {
             if (isCurrentUser)
               TextButton(
                 child: Text("Edit Photo"),
-                onPressed: () {
+                onPressed: () async {
                   Navigator.pop(context);
                   _pickImage().then((_) {
                     _uploadImage();
@@ -166,7 +220,7 @@ class _ProfilePhotoWidgetState extends State<ProfilePhotoWidget> {
             top: 0,
             right: 0,
             child: IconButton(
-              icon: Icon(Icons.edit,color: Color.fromARGB(255, 255, 240, 223),),
+              icon: Icon(Icons.edit, color: Color.fromARGB(255, 255, 240, 223)),
               onPressed: () {
                 _pickImage().then((_) {
                   _uploadImage();

@@ -33,7 +33,7 @@ class MessagingService {
     try {
       String conversationId =
           generateConversationId(senderUserId, receiverUserId);
-      
+
       // Check if sender is allowed to send a message
       bool CanSendMessage = await canSendMessage(senderUserId, receiverUserId);
 
@@ -73,8 +73,8 @@ class MessagingService {
           .set({
         'conversationId': conversationId,
         'receiverUserId': receiverUserId,
-        'senderUserId': senderUserId, 
-        'timestamp': FieldValue.serverTimestamp(),// Add sender's ID
+        'senderUserId': senderUserId,
+        'timestamp': FieldValue.serverTimestamp(), // Add sender's ID
       });
     } catch (e) {
       print('Error sending message: $e');
@@ -119,6 +119,21 @@ class MessagingService {
     } else {
       int messageCount = await countMessages(senderUserId, receiverUserId);
       return messageCount < 1;
+    }
+  }
+
+  // Delete a message
+  Future<void> deleteMessage(String messageId, String conversationId) async {
+    try {
+      await _firestore
+          .collection('Conversations')
+          .doc(conversationId)
+          .collection('Messages')
+          .doc(messageId)
+          .delete();
+    } catch (e) {
+      print('Error deleting message: $e');
+      throw e;
     }
   }
 }

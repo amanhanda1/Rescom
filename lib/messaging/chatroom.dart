@@ -81,6 +81,24 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     }
   }
 
+  Future<void> _deleteMessage(String messageId) async {
+    String conversationId = _messagingService.generateConversationId(
+    widget.senderUserId,
+    widget.receiverUserId,
+  );
+    try {
+      await _messagingService.deleteMessage(messageId,conversationId);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Message deleted')),
+      );
+    } catch (e) {
+      print('Error deleting message: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to delete message')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     void navigateToEventPage() {
@@ -177,6 +195,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                     final messageData =
                         messages[index].data() as Map<String, dynamic>;
                     final String message = messageData['message'];
+                    final String messageId = messages[index].id;
                     final Timestamp? timestamp = messageData['timestamp'];
                     final DateTime messageDate = timestamp != null ? timestamp.toDate() : DateTime.now();
                     final String senderUserId = messageData['senderUserId'];
@@ -241,7 +260,35 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                     borderRadius: BorderRadius.circular(16),
                                   ),
                                   child: GestureDetector(
-                                    onLongPress: () {},
+                                    onLongPress: () {
+                                      if (isSenderMessage) {
+                                        showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: Text("Delete Message"),
+                                              content: Text(
+                                                  "Are you sure you want to delete this message?"),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  child: Text("Cancel"),
+                                                ),
+                                                TextButton(
+                                                  onPressed: () {
+                                                    _deleteMessage(messageId);
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  child: Text("Delete"),
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        );
+                                      }
+                                    },
                                     child: Text(
                                       message,
                                       style:
