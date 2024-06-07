@@ -43,8 +43,7 @@ class FriendCountWidget extends StatelessWidget {
             );
           },
           child: Text(
-            'network',
-            style: TextStyle(color: Colors.purple.shade400),
+            'network',style: TextStyle(color:const Color.fromARGB(128, 0, 128, 1))
           ),
         );
       },

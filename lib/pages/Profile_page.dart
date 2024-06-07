@@ -3,6 +3,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:resapp/components/Profile_photo.dart';
 import 'package:resapp/components/custom_nav_bar.dart';
@@ -422,10 +423,16 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget _buildLinkedInButton(String linkedInUrl) {
     return TextButton(
+      
       onPressed: () {
         _launchURL(linkedInUrl);
       },
-      child: const Text('LinkedIn'),
+      child: Row(
+        children: [
+          Icon(FontAwesomeIcons.linkedin,color:const Color.fromARGB(128, 0, 128, 1)),
+          const Text('LinkedIn',style: TextStyle(color:const Color.fromARGB(128, 0, 128, 1))),
+        ],
+      ),
     );
   }
 
@@ -434,7 +441,12 @@ class _ProfilePageState extends State<ProfilePage> {
       onPressed: () {
         _launchURL(researchGateUrl);
       },
-      child: const Text('Res Gate'),
+      child: Row(
+        children: [
+          Icon(FontAwesomeIcons.researchgate,color:const Color.fromARGB(128, 0, 128, 1)),
+          const Text('Res Gate',style: TextStyle(color:const Color.fromARGB(128, 0, 128, 1))),
+        ],
+      ),
     );
   }
 

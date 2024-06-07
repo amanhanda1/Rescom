@@ -124,6 +124,7 @@ class _AddUserState extends State<AddUser> {
                   onChanged: _handleSearch,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
+                    icon: Icon(Icons.search, color: Colors.white60),
                     hintText: 'Search user or university',
                     hintStyle: TextStyle(color: Colors.white60),
                     border: InputBorder.none,

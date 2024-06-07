@@ -1,8 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:resapp/components/edit_profile.dart';
 import 'package:resapp/pages/First_page.dart';
 import 'package:resapp/pages/ResetPassword.dart';
+import 'package:resapp/pages/contact_us.dart';
 import 'package:resapp/pages/feedback_page.dart';
 import 'package:resapp/pages/notificationturner.dart';
 import 'package:resapp/pages/termsandcondition.dart';
@@ -27,6 +29,12 @@ class _SettingsPageState extends State<SettingsPage> {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => TAC()),
+      );
+    }
+    void navigateTocontactus() {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => Contactus()),
       );
     }
 
@@ -112,10 +120,10 @@ class _SettingsPageState extends State<SettingsPage> {
             title: Text('Contact us',
                 style:
                     TextStyle(color: const Color.fromARGB(255, 255, 240, 223))),
-            onTap: () {},
+            onTap: navigateTocontactus,
           ),
           ListTile(
-            leading: Icon(Icons.policy,
+            leading: Icon(FontAwesomeIcons.squareLetterboxd,
                 color: const Color.fromARGB(255, 255, 240, 223)),
             title: Text('Privacy policy',
                 style:
