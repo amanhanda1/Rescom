@@ -50,39 +50,65 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Future<void> _updateProfile() async {
-    if (_user != null) {
-      String username = nameController.text.trim();
-      String bio = bioController.text.trim();
-      String linkedInUrl = linkedInController.text.trim();
-      String researchGateUrl = researchGateController.text.trim();
-      String Gender=GenderController.text.trim();
+  if (_user != null) {
+    String username = nameController.text.trim();
+    String bio = bioController.text.trim();
+    String linkedInUrl = linkedInController.text.trim();
+    String researchGateUrl = researchGateController.text.trim();
+    String gender = GenderController.text.trim();
 
-      // Update only if username or bio is not empty
-      if (username.isNotEmpty || bio.isNotEmpty) {
-        await FirebaseFirestore.instance
-            .collection("Users")
-            .doc(_user!.uid)
-            .update({
-          'username': username.isNotEmpty ? username : _username,
-          'bio': bio.isNotEmpty ? bio : _bio,
-          'linkedInUrl': linkedInUrl.isNotEmpty ? linkedInUrl : _linkedInUrl,
-          'researchGateUrl':
-              researchGateUrl.isNotEmpty ? researchGateUrl : _researchGateUrl,
-              'Gender':Gender,
-        });
+    Map<String, dynamic> updateData = {};
 
-        setState(() {
-          _username = username.isNotEmpty ? username : _username;
-          _bio = bio.isNotEmpty ? bio : _bio;
-          _linkedInUrl = linkedInUrl.isNotEmpty ? linkedInUrl : _linkedInUrl;
-          _researchGateUrl =
-              researchGateUrl.isNotEmpty ? researchGateUrl : _researchGateUrl;
-        });
-      }
-
-      Navigator.pop(context);
+    if (username.isNotEmpty) {
+      updateData['username'] = username;
     }
+    if (bio.isNotEmpty) {
+      updateData['bio'] = bio;
+    }
+    if (linkedInUrl.isNotEmpty) {
+      updateData['linkedInUrl'] = linkedInUrl;
+    }
+    if (researchGateUrl.isNotEmpty) {
+      updateData['researchGateUrl'] = researchGateUrl;
+    }
+    if (gender.isNotEmpty) {
+      updateData['Gender'] = gender;
+    }
+
+    // Update only if there is data to update
+    if (updateData.isNotEmpty) {
+      await FirebaseFirestore.instance
+          .collection("Users")
+          .doc(_user!.uid)
+          .update(updateData);
+
+      setState(() {
+        if (updateData.containsKey('username')) _username = username;
+        if (updateData.containsKey('bio')) _bio = bio;
+        if (updateData.containsKey('linkedInUrl')) _linkedInUrl = linkedInUrl;
+        if (updateData.containsKey('researchGateUrl')) _researchGateUrl = researchGateUrl;
+      });
+    }
+
+    // Show the AlertDialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Profile Updated"),
+          content: Text("Please refresh the app to see the changes."),
+        );
+      },
+    );
+
+    // Close the dialog after 3.5 seconds and navigate back
+    Future.delayed(Duration(seconds: 2), () {
+      Navigator.of(context).pop(); // Close the AlertDialog
+      Navigator.pop(context); // Navigate back
+    });
   }
+}
+
 
   @override
   Widget build(BuildContext context) {

@@ -37,6 +37,7 @@ class _ProfilePageState extends State<ProfilePage> {
     super.initState();
     
   }
+  
   void navigateToProfilePage(String userId) {
     Navigator.push(
       context,
@@ -45,38 +46,7 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     );
   }
-  void checkForNewMessages() {
-    final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser != null) {
-      FirebaseFirestore.instance
-          .collection('Users')
-          .doc(currentUser.uid)
-          .collection('Conversations')
-          .snapshots()
-          .listen((snapshot) {
-        bool newMessages = false;
-        for (var doc in snapshot.docs) {
-          FirebaseFirestore.instance
-              .collection('Conversations')
-              .doc(doc['conversationId'])
-              .collection('Messages')
-              .where('seen', isEqualTo: false)
-              .where('receiverUserId', isEqualTo: currentUser.uid)
-              .snapshots()
-              .listen((messageSnapshot) {
-            if (messageSnapshot.docs.isNotEmpty) {
-              newMessages = true;
-            }
-            if (newMessages != hasNewMessages) {
-              setState(() {
-                hasNewMessages = newMessages;
-              });
-            }
-          });
-        }
-      });
-    }
-  }
+  
 
   void logout() async {
   try {
@@ -396,7 +366,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ],
                 ),
-
                 const Divider(
                   color: Colors.black,
                   thickness: 1,
@@ -430,7 +399,7 @@ class _ProfilePageState extends State<ProfilePage> {
       child: Row(
         children: [
           Icon(FontAwesomeIcons.linkedin,color:const Color.fromARGB(128, 0, 128, 1)),
-          const Text('LinkedIn',style: TextStyle(color:const Color.fromARGB(128, 0, 128, 1))),
+          const Text('LinkedIn',style: TextStyle(color:Color.fromARGB(255, 255, 240, 223))),
         ],
       ),
     );
@@ -444,7 +413,7 @@ class _ProfilePageState extends State<ProfilePage> {
       child: Row(
         children: [
           Icon(FontAwesomeIcons.researchgate,color:const Color.fromARGB(128, 0, 128, 1)),
-          const Text('Res Gate',style: TextStyle(color:const Color.fromARGB(128, 0, 128, 1))),
+          const Text('Res Gate',style: TextStyle(color:Color.fromARGB(255, 255, 240, 223))),
         ],
       ),
     );
