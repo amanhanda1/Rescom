@@ -47,7 +47,7 @@ Future<void> _loadSelectedTopics() async {
       backgroundColor: const Color.fromARGB(255, 26, 24, 46),
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(128, 0, 128, 1),
-        title: Text('Select Research Topics'),
+        title: Text('Select Research Areas'),
       ),
       body: Column(
         children: [

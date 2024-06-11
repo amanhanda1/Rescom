@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart'; // Import for kIsWeb
 import 'package:flutter/material.dart';
 import 'package:resapp/components/error.dart';
 import 'package:resapp/components/mytextfield.dart';
@@ -293,7 +292,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(
                     width: 16,
                   ),
-                  if (!kIsWeb) // Check if not running on web
+                  // if (!kIsWeb) // Check if not running on web
                     ElevatedButton(
                       style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all<Color>(

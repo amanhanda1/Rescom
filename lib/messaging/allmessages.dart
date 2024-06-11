@@ -21,39 +21,6 @@ class allMessages extends StatefulWidget {
 class _allMessagesState extends State<allMessages> {
   final _navigationBarKey = GlobalKey<cNavigationBarState>();
   final currentUser = FirebaseAuth.instance.currentUser;
-
-  @override
-  void initState() {
-    super.initState();
-
-    // Listen to the Firestore stream for new messages
-    FirebaseFirestore.instance
-        .collection('Users')
-        .doc(widget.userId)
-        .collection('Conversations')
-        .orderBy('timestamp', descending: true)
-        .snapshots()
-        .listen((snapshot) async {
-      // Check if there are any new messages
-      final hasNewMessage = await Future.wait(snapshot.docs.map((doc) async {
-        final conversationId = doc['conversationId'];
-
-        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-            .collection('Conversations')
-            .doc(conversationId)
-            .collection('Messages')
-            .where('senderUserId', isNotEqualTo: currentUser!.uid)
-            .where('seen', isEqualTo: false)
-            .get();
-
-        return querySnapshot.docs.isNotEmpty;
-      })).then((results) => results.contains(true));
-
-      // Update the navigation bar with the new message status
-      _navigationBarKey.currentState?.setNewMessageStatus(hasNewMessage);
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     void navigateToHomePage() {

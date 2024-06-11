@@ -19,7 +19,6 @@ class cNavigationBar extends StatefulWidget {
 }
 
 class cNavigationBarState extends State<cNavigationBar> {
-  bool _hasNewMessage = false; // Track if there is a new message
 
   @override
   Widget build(BuildContext context) {
@@ -30,51 +29,40 @@ class cNavigationBarState extends State<cNavigationBar> {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         mainAxisSize: MainAxisSize.min,
         children: [
-          IconButton(
-            icon: const Icon(Icons.home_filled,
-                color: Color.fromARGB(255, 255, 240, 223)),
-            onPressed: widget.onHomePressed,
-          ),
-          IconButton(
-            icon: const Icon(Icons.group_add_outlined,
-                color: Color.fromARGB(255, 255, 240, 223)),
-            onPressed: widget.onAdduserPressed,
-          ),
-          Stack(
-            children: [
-              IconButton(
-                onPressed: widget.onChatPressed,
-                icon: const Icon(Icons.message_outlined,
-                    color: Color.fromARGB(255, 255, 240, 223)),
-              ),
-              if (_hasNewMessage)
-                Positioned(
-                  top: 0,
-                  right: 0,
-                  child: Container(
-                    width: 10,
-                    height: 10,
-                    decoration: const BoxDecoration(
-                      color: Colors.red,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          IconButton(
-            icon: const Icon(Icons.person,
-                color: Color.fromARGB(255, 255, 240, 223)),
-            onPressed: widget.onProfileIconPressed,
-          ),
-        ],
+  Tooltip(
+    message: 'Home',
+    child: IconButton(
+      icon: const Icon(Icons.home_filled,
+          color: Color.fromARGB(255, 255, 240, 223)),
+      onPressed: widget.onHomePressed,
+    ),
+  ),
+  Tooltip(
+    message: 'Find User',
+    child: IconButton(
+      icon: const Icon(Icons.group_add_outlined,
+          color: Color.fromARGB(255, 255, 240, 223)),
+      onPressed: widget.onAdduserPressed,
+    ),
+  ),
+  Tooltip(
+    message: 'Chat',
+    child: IconButton(
+      icon: const Icon(Icons.message_outlined,
+          color: Color.fromARGB(255, 255, 240, 223)),
+      onPressed: widget.onChatPressed,
+    ),
+  ),
+  Tooltip(
+    message: 'Profile',
+    child: IconButton(
+      icon: const Icon(Icons.person,
+          color: Color.fromARGB(255, 255, 240, 223)),
+      onPressed: widget.onProfileIconPressed,
+    ),
+  ),
+],
       ),
     );
-  }
-
-  void setNewMessageStatus(bool hasNewMessage) {
-    setState(() {
-      _hasNewMessage = hasNewMessage;
-    });
   }
 }

@@ -17,7 +17,7 @@ class UniversityListScreen extends StatefulWidget {
 class UniversityListScreenState extends State<UniversityListScreen> {
   String searchText = '';
   List<dynamic> universities = [];
-  bool _isFetchingData = false; // Flag to indicate if data is being fetched
+  bool _isFetchingData = false;
 
   @override
   void initState() {
@@ -27,7 +27,7 @@ class UniversityListScreenState extends State<UniversityListScreen> {
 
   @override
   void dispose() {
-    _isFetchingData = false; // Stop fetching data when the widget is disposed
+    _isFetchingData = false;
     super.dispose();
   }
 
@@ -48,7 +48,7 @@ class UniversityListScreenState extends State<UniversityListScreen> {
       _isFetchingData = true;
       try {
         final response = await http.get(
-          Uri.parse('http://universities.hipolabs.com/search?name=$searchText'),
+          Uri.parse('https://rescom.amanhanda446.workers.dev/search?name=$searchText'), // Use the Cloudflare Worker URL
         );
 
         if (response.statusCode == 200) {

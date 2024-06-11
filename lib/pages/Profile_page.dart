@@ -191,19 +191,16 @@ class _ProfilePageState extends State<ProfilePage> {
               child: CircularProgressIndicator(),
             );
           }
-
           if (snapshot.hasError) {
             return Center(
               child: Text("Error: ${snapshot.error}"),
             );
           }
-
           if (!snapshot.hasData || snapshot.data == null) {
             return const Center(
               child: Text("User data not found"),
             );
           }
-
           final userData = snapshot.data!.data() as Map<String, dynamic>;
           final name = userData['username'] ?? '';
           final fname = userData['firstName'] ?? '';
@@ -350,7 +347,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 Row(
                   children: [
                     const Text(
-                      "Research Topics:",
+                      "Research Areas:",
                       style: TextStyle(
                         color: Color.fromARGB(255, 255, 240, 223),
                         fontSize: 11,

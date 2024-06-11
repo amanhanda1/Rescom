@@ -16,6 +16,7 @@ dependencies:
   flutter_local_notifications: ^17.1.2
   flutter_plugin_android_lifecycle: ^2.0.17
   webview_flutter: ^4.8.0
+  flutter_cors: ^1.5.0
   google_sign_in: ^6.1.6
   firebase_auth: ^4.12.0
   cloud_firestore: ^4.13.2
